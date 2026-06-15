@@ -22,6 +22,10 @@ def patient_exercise_status(request, patient_id):
     # clinic_id = patient.origin_clinic.id if patient.origin_clinic else '',
     clinic_id = patient.origin_clinic.id if patient.origin_clinic else None
     prescriptions = Prescription.objects.filter(patient=patient).order_by('-created_at')
+    
+    user = request.user
+    userType = user.user_type
+
 
     
     # Calculate statistics
@@ -61,6 +65,7 @@ def patient_exercise_status(request, patient_id):
         'completed_prescriptions': completed_prescriptions,
         'clinic_id': clinic_id,
         'today': date.today(),
+        "user_type": userType,
     }
     
     
