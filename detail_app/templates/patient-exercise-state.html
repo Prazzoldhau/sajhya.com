@@ -240,10 +240,14 @@
         .btn-secondary {
             background: #6c757d;
             color: white;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .btn-secondary:hover {
+            display: inline-block;
             background: #5a6268;
+            text-decoration: none;
         }
 
         .btn-success {
@@ -303,7 +307,12 @@
         <!-- Back Button -->
         <div class="back-button">
             <button class="btn btn-secondary" onclick="window.history.back()">← Back</button>
-            <button class="btn btn-secondary" onclick="window.history.go(-2)">Acction Page</button>
+            {% if clinic_id %}
+                <a href="{% url 'assigned-clinic-dashboard' clinic_id=clinic_id %}" class="btn btn-secondary">Clinic Page</a>
+            {% else %}
+                <button class="btn btn-secondary" disabled title="No clinic assigned">Clinic Page</button>
+            {% endif %}
+           
         </div>
      
 
@@ -315,7 +324,7 @@
                     <p><strong>Patient Code:</strong> {{ patient.patient_code }}</p>
                     <p><strong>Diagnosis:</strong> {{ patient.diagnosis|default:"Not specified" }}</p>
                 </div>
-                <div class="stats">
+                {% comment %} <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number">{{ total_prescriptions }}</div>
                         <div class="stat-label">Total Prescriptions</div>
@@ -328,7 +337,7 @@
                         <div class="stat-number">{{ completed_prescriptions }}</div>
                         <div class="stat-label">Completed</div>
                     </div>
-                </div>
+                </div> {% endcomment %}
             </div>
         </div>
 
@@ -415,22 +424,6 @@
                         {{ prescription_data.prescription.prescription_notes }}
                     </div>
                     {% endif %}
-                    
-                    {% comment %} <div class="prescription-footer">
-                        <div>
-                            <small>Prescribed on: {{ prescription_data.prescription.prescription_date|date:"M d, Y H:i" }}</small>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary" onclick="viewExerciseDetails({{ prescription_data.prescription.id }})">
-                                View Details
-                            </button>
-                            {% if prescription_data.is_active %}
-                                <button class="btn btn-success" onclick="downloadPrescriptionPDF({{ prescription_data.prescription.id }})">
-                                    Download PDF
-                                </button>
-                            {% endif %}
-                        </div>
-                    </div> {% endcomment %}
                 </div>
             </div>
             {% endfor %}

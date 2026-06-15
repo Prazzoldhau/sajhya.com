@@ -25,25 +25,11 @@
 <div class="container">
         <!-- Header -->
     <div class="header">
-        <div class = "tab-grid">
-            <div class="tab-card">
-                <h1>Welcome,</h1>
-                <h4>{{clinic.clinic_name }}.</h4>
-            </div>
-
-
-            <a href="{% url 'add-patient-to-clinic' clinic_id=clinic.id %}" class="tab-card">
-                <h1>Add Patient</h1>
-                <p>Here are all your staffs.</p>
-            </a>
-            
-
-            <a href = "#" class="tab-card">  
-                <h1>+ comming soon </h1>
-                <p> Future features.</p>
-            </a>
-        </div>
+        <a href="{% url 'add-patient-to-clinic' clinic_id=clinic.id %}">
+            <h1>Add Patient</h1>
+        </a>        
     </div>
+    <br>
 
 
 
@@ -91,7 +77,7 @@
                     <td>
                         <a href="{% url 'patient-detail' %}" class="btn btn-info">Stat</a>
                         <a href="{% url 'patient-exercise-status' patient_id=patient.id %}" class="btn btn-success">Track</a>
-                        <a href={% url 'prescription-page' %}" class="btn btn-info">Rx</a>
+                        <a href="{% url 'prescription-page' patient_id=patient.id %}" class="btn btn-info">Rx</a>
                         <a href="{% url 'exercise-selectable' patient_id=patient.id %}" class="btn btn-success">Exe</a>
                     </td>
                 </tr>

@@ -34,18 +34,12 @@
 </div>  <!-- ✅ Closing navbar properly -->
 <div class="container">
         <!-- Header -->
-    <div class="header">
-        <div class = "tab-grid">
-            <div class = "tab-card">
-                <h1>My Patients</h1>
-                <p>Welcome, {{ request.user.username }}! Here are all patients under your care.</p>
-            </div>
-            <a href = "{% url 'my-clinics' %}" class= "tab-card">
-                <h1>Clinics </h1>
-                <p> Here are list of your clinics</p>
-            </a>
-        </div>
+    <div class="header">   
+        <a href = "{% url 'my-clinics' %}" >
+            <h1>Clinics </h1>
+        </a>
     </div>
+    <br>
 
 
 
@@ -98,7 +92,7 @@
                     <td>
                         <a href="{% url 'patient-detail' %}" class="btn btn-info">Stat</a>
                         <a href="{% url 'patient-exercise-status' patient_id=patient.id %}" class="btn btn-success">Track</a>
-                        <a href="{% url 'prescription-page' %}" class="btn btn-info">Rx</a>
+                        <a href="{% url 'prescription-page' patient_id=patient.id %}" class="btn btn-info">Rx</a>
                         <a href="{% url 'exercise-selectable' patient_id=patient.id %}" class="btn btn-success">Exe</a>
                     </td>
                 </tr>

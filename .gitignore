@@ -7,3 +7,4 @@ static/admin/
 static/import_export/
 stderr.log
 tmp/
+venv/

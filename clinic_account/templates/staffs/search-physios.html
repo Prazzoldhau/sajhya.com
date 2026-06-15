@@ -158,8 +158,16 @@
         })
         .then(response => response.json())
         .then(data => {
-            if (data.success) alert('Claimed!');
-            else alert(data.error);
+            if (data.success) {
+                alert('Claimed!');
+                window.history.go(-1);   // go back only on success
+            } else {
+                alert(data.error);       // show error, stay on page
+            }
+        })
+        .catch(err => {
+            console.error('Fetch error:', err);
+            alert('Network error occurred');
         });
     }
 

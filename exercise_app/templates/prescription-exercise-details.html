@@ -172,7 +172,7 @@
         }
 
         .exercises-table {
-            width: 100%;
+            width: 600px;
             border-collapse: collapse;
         }
 
@@ -276,6 +276,15 @@
             margin-bottom: 20px;
         }
 
+        /* To this: */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            width: 100%;
+            display: block;
+            position: relative;  /* ← add this */
+        }
+
         @media (max-width: 768px) {
             .prescription-header {
                 flex-direction: column;
@@ -294,8 +303,9 @@
             .exercises-table th,
             .exercises-table td {
                 padding: 10px;
-            }
+            } 
         }
+
     </style>
 </head>
 <body>
@@ -362,55 +372,57 @@
                 </div>
                 
                 <div class="prescription-body" id="prescription-body-{{ forloop.counter0 }}">
-                    <table class="exercises-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 40px"></th>
-                                <th>Exercise Name</th>
-                                <th>Type</th>
-                                <th>Sets</th>
-                                <th>Reps</th>
-                                <th>Difficulty</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for exercise in prescription_data.exercises %}
-                            <tr>
-                                <td>
-                                    <input type="checkbox" 
-                                           class="checkbox-complete" 
-                                           data-exercise-id="{{ exercise.id }}"
-                                           {% if exercise.is_completed %}checked{% endif %}
-                                           onchange="toggleExerciseCompletion({{ exercise.id }}, this)">
-                                </td>
-                                <td><strong>{{ exercise.exercise_name }}</strong></td>
-                                <td>{{ exercise.exercise_type|default:"General" }}</td>
-                                <td>{{ exercise.sets }}</td>
-                                <td>{{ exercise.reps }}</td>
-                                <td>
-                                    <span class="difficulty difficulty-{{ exercise.difficulty_level }}">
-                                        Level {{ exercise.difficulty_level }}
-                                    </span>
-                                </td>
-                                <td>
-                                    {% if exercise.is_completed %}
-                                        <span class="exercise-completed">✓ Completed</span>
-                                    {% else %}
-                                        <span class="exercise-pending">○ Pending</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            {% if exercise.exercise_notes %}
-                            <tr>
-                                <td colspan="7" style="background: #fff3cd; padding: 10px 15px;">
-                                    <strong>📝 Note:</strong> {{ exercise.exercise_notes }}
-                                </td>
-                            </tr>
-                            {% endif %}
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                    <div class="table-responsive"> 
+                        <table class="exercises-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px"></th>
+                                    <th>Exercise Name</th>
+                                    <th>Type</th>
+                                    <th>Sets</th>
+                                    <th>Reps</th>
+                                    <th>Difficulty</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for exercise in prescription_data.exercises %}
+                                <tr>
+                                    <td>
+                                        <input type="checkbox" 
+                                            class="checkbox-complete" 
+                                            data-exercise-id="{{ exercise.id }}"
+                                            {% if exercise.is_completed %}checked{% endif %}
+                                            onchange="toggleExerciseCompletion({{ exercise.id }}, this)">
+                                    </td>
+                                    <td><strong>{{ exercise.exercise_name }}</strong></td>
+                                    <td>{{ exercise.exercise_type|default:"General" }}</td>
+                                    <td>{{ exercise.sets }}</td>
+                                    <td>{{ exercise.reps }}</td>
+                                    <td>
+                                        <span class="difficulty difficulty-{{ exercise.difficulty_level }}">
+                                            Level {{ exercise.difficulty_level }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if exercise.is_completed %}
+                                            <span class="exercise-completed">✓ Completed</span>
+                                        {% else %}
+                                            <span class="exercise-pending">○ Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if exercise.exercise_notes %}
+                                <tr>
+                                    <td colspan="7" style="background: #fff3cd; padding: 10px 15px;">
+                                        <strong>📝 Note:</strong> {{ exercise.exercise_notes }}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                     
                     {% if prescription_data.prescription.prescription_notes %}
                     <div style="padding: 15px 25px; background: #e3f2fd; margin-top: 10px;">

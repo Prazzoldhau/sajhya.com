@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Physiotherapy Treatment Record</title>
     <style>
+        /* Your existing CSS (unchanged) */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -60,6 +61,7 @@
             cursor: pointer;
             border: 3px solid transparent;
             transition: 0.2s;
+            position: relative;
         }
         .modality-card.selected {
             border-color: #28a745;
@@ -86,7 +88,6 @@
             padding: 15px;
             text-align: center;
         }
-        .modality-icon { font-size: 2rem; margin-bottom: 8px; }
         .modality-name { font-size: 1rem; font-weight: bold; }
         .stats {
             background: white;
@@ -136,38 +137,38 @@
     </style>
 </head>
 <body>
+
 <div class="container">
+
+    <input type="hidden" id="patientId" value="{{ patient.id }}">
+    
     <div class="header">
-        <h1>🔧 Physiotherapy Treatment Record</h1>
-        <p>John Doe | P12345</p>
-        <p>Lumbar Radiculopathy</p>
+        <h1>Physiotherapy Treatment Record</h1>
+        <p>{{ patient.patient_name }} | {{ patient.id }}</p>
+        <p>{{ patient.patient_diagnosis }}</p>
     </div>
 
     <!-- Session Info -->
     <div class="selection-card">
-        <h3>📋 Session Information</h3>
         <div class="grid-2col">
             <div class="form-group">
-                <label>🔢 Session Number</label>
-                <input type="number" id="sessionNumber" value="1" readonly style="background:#f0f0f0;">
-            </div>
-            <div class="form-group">
-                <label>⏱️ Duration (minutes)</label>
-                <input type="number" id="duration" value="30">
+                <label>🔢 Session Number (auto)</label>
+                <input type="number" id="sessionNumber" name="session_number" value="{{ new_session }}" readonly style="background:#f0f0f0;">
             </div>
         </div>
     </div>
+
+
 
     <!-- Pre-session -->
     <div class="selection-card">
         <h3>📝 Pre-Session Assessment</h3>
         <div class="grid-2col">
-            <div class="form-group"><label>😖 Pain Level (0-10)</label><input type="number" id="prePain" min="0" max="10"></div>
-            <div class="form-group"><label>❤️ Blood Pressure</label><input type="text" id="preBP" placeholder="120/80"></div>
-            <div class="form-group"><label>💓 Heart Rate</label><input type="number" id="preHR" placeholder="bpm"></div>
-            <div class="form-group"><label>📏 Other vitals</label><input type="text" id="preVitals" placeholder="O2, RR"></div>
+            <div class="form-group"><label>😖 Pain Level (0-10)</label><input type="number" id="prePain" name="pre_pain" min="0" max="10" value="5"></div>
+            <div class="form-group"><label>❤️ Blood Pressure</label><input type="text" id="preBP" name="pre_bp" value="120/80"></div>
+            <div class="form-group"><label>💓 Heart Rate</label><input type="number" id="preHR" name="pre_hr" value="88"></div>
         </div>
-        <div class="form-group"><label>📄 Pre-session notes</label><textarea id="preNotes" rows="2"></textarea></div>
+        <div class="form-group"><label>📄 Pre-session notes</label><textarea id="preNotes" name="pre_notes" rows="2"></textarea></div>
     </div>
 
     <!-- Modalities Grid -->
@@ -185,9 +186,9 @@
     <div class="selection-card">
         <h3>📈 Post-Session Assessment</h3>
         <div class="grid-2col">
-            <div class="form-group"><label>😊 Pain after (0-10)</label><input type="number" id="postPain" min="0" max="10"></div>
+            <div class="form-group"><label>😊 Pain after (0-10)</label><input type="number" id="postPain" name="post_pain" min="0" max="10"></div>
             <div class="form-group"><label>📊 Treatment Response</label>
-                <select id="response">
+                <select id="response" name="treatment_response">
                     <option value="excellent">Excellent</option>
                     <option value="good">Good</option>
                     <option value="moderate">Moderate</option>
@@ -196,13 +197,19 @@
                 </select>
             </div>
         </div>
-        <div class="form-group"><label>⚠️ Adverse effects</label><textarea id="postRemarks" rows="2"></textarea></div>
+        <div class="form-group"><label>⚠️ Adverse effects</label><textarea id="postRemarks" name="post_remarks" rows="2"></textarea></div>
     </div>
 
     <!-- Follow-up -->
     <div class="selection-card">
         <h3>📝 Follow-up Instructions</h3>
-        <textarea id="followUpInstructions" rows="2"></textarea>
+        <textarea id="followUpInstructions" name="follow_up_instructions" rows="2"></textarea>
+    </div>
+
+    <!-- Next Session Date -->
+    <div class="selection-card">
+        <h3>📅 Next Session</h3>
+        <input type="date" id="nextSessionDate" name="next_session">
     </div>
 
     <!-- Summary -->
@@ -211,7 +218,8 @@
         <div class="selected-modalities-list" id="selectedModalitiesList"></div>
         <div class="action-buttons">
             <button class="btn btn-secondary" onclick="clearAllSelections()">Clear All</button>
-            <button class="btn btn-success" onclick="saveTreatmentSession()">💾 Save Session</button>
+            <button class="btn btn-success" onclick="saveTreatmentSession('exercise')">💾 Save + Exercise</button>
+            <button class="btn btn-success" onclick="saveTreatmentSession('return')">💾 Save and Return</button>
         </div>
     </div>
 </div>
@@ -231,20 +239,20 @@
 <script>
     // ======================== MODALITIES MASTER LIST ========================
     const modalities = [
-        { id: "ift", name: "IFT", icon: "⚡", params: [{ name: "Carrier Frequency", default: "4000 Hz" }, { name: "Beat Frequency", default: "100 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "russian", name: "Russian Current", icon: "💪", params: [{ name: "Carrier Freq", default: "2500 Hz" }, { name: "Burst Rate", default: "50 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "tens", name: "TENS", icon: "🎵", params: [{ name: "Frequency", default: "100 Hz" }, { name: "Pulse Width", default: "100 µs" }, { name: "Duration (min)", default: "15", type: "number" }] },
-        { id: "us", name: "Ultrasound", icon: "🔄", params: [{ name: "Frequency (MHz)", default: "1" }, { name: "Duty Cycle", default: "50%" }, { name: "Intensity", default: "0.8 W/cm²" }, { name: "Duration (min)", default: "5", type: "number" }] },
-        { id: "dry_needling", name: "Dry Needling", icon: "📍", params: [{ name: "Technique", default: "Superficial" }, { name: "Points", default: "4" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "cupping", name: "Cupping", icon: "🥤", params: [{ name: "Pressure", default: "Medium" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "laser", name: "Laser Therapy", icon: "🔴", params: [{ name: "Wavelength", default: "810 nm" }, { name: "Power", default: "5 W" }, { name: "Duration (min)", default: "8", type: "number" }] },
-        { id: "iastm", name: "IASTM", icon: "🔧", params: [{ name: "Tool", default: "Stainless" }, { name: "Duration (min)", default: "8", type: "number" }] },
-        { id: "manual_therapy", name: "Manual Therapy", icon: "🤲", params: [{ name: "Techniques", default: "Mobilization" }, { name: "Duration (min)", default: "15", type: "number" }] },
-        { id: "traction", name: "Traction", icon: "🪢", params: [{ name: "Force (kg)", default: "15" }, { name: "Duration (min)", default: "12", type: "number" }] },
-        { id: "ems", name: "Muscle Stim", icon: "💪⚡", params: [{ name: "Frequency", default: "50 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "cpm", name: "CPM", icon: "🔄", params: [{ name: "Range", default: "0-90°" }, { name: "Duration (min)", default: "20", type: "number" }] },
-        { id: "tecar", name: "TECAR", icon: "🔥⚡", params: [{ name: "Mode", default: "Capacitive" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "shockwave", name: "Shockwave", icon: "💥🔊", params: [{ name: "Pressure (bar)", default: "3" }, { name: "Shots", default: "2000", type: "number" }, { name: "Duration (min)", default: "8", type: "number" }] }
+        { id: "ift", name: "IFT", params: [{ name: "Carrier Frequency", default: "4000 Hz" }, { name: "Beat Frequency", default: "100 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
+        { id: "russian", name: "Russian Current", params: [{ name: "Carrier Freq", default: "2500 Hz" }, { name: "Burst Rate", default: "50 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
+        { id: "tens", name: "TENS", params: [{ name: "Frequency", default: "100 Hz" }, { name: "Pulse Width", default: "100 µs" }, { name: "Duration (min)", default: "15", type: "number" }] },
+        { id: "us", name: "Ultrasound", params: [{ name: "Frequency (MHz)", default: "1" }, { name: "Duty Cycle", default: "50%" }, { name: "Intensity", default: "0.8 W/cm²" }, { name: "Duration (min)", default: "5", type: "number" }] },
+        { id: "dry_needling", name: "Dry Needling", params: [{ name: "Technique", default: "Superficial" }, { name: "Points", default: "4" }, { name: "Duration (min)", default: "10", type: "number" }] },
+        { id: "cupping", name: "Cupping", params: [{ name: "Pressure", default: "Medium" }, { name: "Duration (min)", default: "10", type: "number" }] },
+        { id: "laser", name: "Laser Therapy", params: [{ name: "Wavelength", default: "810 nm" }, { name: "Power", default: "5 W" }, { name: "Duration (min)", default: "8", type: "number" }] },
+        { id: "iastm", name: "IASTM", params: [{ name: "Tool", default: "Stainless" }, { name: "Duration (min)", default: "8", type: "number" }] },
+        { id: "manual_therapy", name: "Manual Therapy", params: [{ name: "Techniques", default: "Mobilization" }, { name: "Duration (min)", default: "15", type: "number" }] },
+        { id: "traction", name: "Traction", params: [{ name: "Force (kg)", default: "15" }, { name: "Duration (min)", default: "12", type: "number" }] },
+        { id: "ems", name: "Muscle Stim", params: [{ name: "Frequency", default: "50 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
+        { id: "cpm", name: "CPM", params: [{ name: "Range", default: "0-90°" }, { name: "Duration (min)", default: "20", type: "number" }] },
+        { id: "tecar", name: "TECAR", params: [{ name: "Mode", default: "Capacitive" }, { name: "Duration (min)", default: "10", type: "number" }] },
+        { id: "shockwave", name: "Shockwave", params: [{ name: "Pressure (bar)", default: "3" }, { name: "Shots", default: "2000", type: "number" }, { name: "Duration (min)", default: "8", type: "number" }] }
     ];
 
     let selectedModalities = [];
@@ -258,7 +266,7 @@
             const card = document.createElement("div");
             card.className = "modality-card";
             card.setAttribute("data-modality-id", mod.id);
-            card.innerHTML = `<div class="modality-header"><div class="modality-icon">${mod.icon}</div><div class="modality-name">${mod.name}</div></div>`;
+            card.innerHTML = `<div class="modality-header"><div class="modality-name">${mod.name}</div></div>`;
             card.onclick = () => {
                 const already = selectedModalities.find(m => m.id === mod.id);
                 if (already) removeModalityById(mod.id);
@@ -392,29 +400,66 @@
         updateCardHighlights();
     }
 
-    function saveTreatmentSession() {
+    function getCsrfToken() {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith('csrftoken=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(10));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function saveTreatmentSession(redirectTarget) {
         const prePain = document.getElementById("prePain").value;
         if (!prePain) return alert("Enter pre-session pain");
         if (!selectedModalities.length) return alert("Select at least one modality");
+
         const sessionData = {
-            patient_id: 1,  // replace with Django variable
+            patient_id: parseInt(document.getElementById("patientId").value),
             session_number: parseInt(document.getElementById("sessionNumber").value),
-            duration: parseInt(document.getElementById("duration").value),
             pre_pain: parseInt(prePain),
             pre_bp: document.getElementById("preBP").value,
             pre_hr: document.getElementById("preHR").value,
-            pre_vitals: document.getElementById("preVitals").value,
             pre_notes: document.getElementById("preNotes").value,
             modalities: selectedModalities,
-            post_pain: document.getElementById("postPain").value,
+            post_pain: document.getElementById("postPain").value ? parseInt(document.getElementById("postPain").value) : null,
             treatment_response: document.getElementById("response").value,
             post_remarks: document.getElementById("postRemarks").value,
-            follow_up_instructions: document.getElementById("followUpInstructions").value
+            follow_up_instructions: document.getElementById("followUpInstructions").value,
+            next_session: document.getElementById("nextSessionDate").value || null,
+            redirect_to: redirectTarget          // <-- NEW field
         };
-        console.log("Session data:", sessionData);
-        alert("Session ready! Check console for data.");
-    }
 
+        console.log("Sending session data:", sessionData);
+
+        fetch("{% url 'save_treatment_session' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCsrfToken()
+            },
+            body: JSON.stringify(sessionData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert("✅ Session saved successfully!");
+                window.location.href = data.next_url;   // redirect based on server response
+            } else {
+                alert("❌ Error: " + data.error);
+            }
+        })
+        .catch(err => {
+            console.error("Fetch error:", err);
+            alert("Network error: " + err);
+        });
+    }
     document.addEventListener("DOMContentLoaded", () => {
         renderModalitiesGrid();
     });

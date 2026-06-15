@@ -20,7 +20,7 @@
                 <a href="#" class="dropdown-item">
                     📋 Manage Clinics
                 </a>
-                <a href="#" class="dropdown-item">
+                <a href="{% url 'staff-dashboard'%}" class="dropdown-item">
                     📋 Manage Staff
                 </a>
                 <a href="#" class="dropdown-item">
@@ -43,25 +43,11 @@
 <div class="container">
         <!-- Header -->
     <div class="header">
-        <div class = "tab-grid">
-            <div class="tab-card">
-                <h1>Patients</h1>
-                <p>Welcome, {{ request.user.username }}! Here are all patients under your care.</p>
-            </div>
-
-
-            <a href="{% url 'staff-dashboard'%}" class="tab-card">
-                <h1>Staffs</h1>
-                <p>Here are all your staffs.</p>
-            </a>
-            
-
-            <a href = "{%url 'clinic-sub-dash'%}" class="tab-card">  
-                <h1>Clinic</h1>
-                <p> Here are all your clinic list.</p>
-            </a>
-        </div>
+        <a href = "{%url 'clinic-sub-dash'%}">  
+            <h1>Clinic</h1>
+        </a>
     </div>
+    <br>
 
 
 
@@ -110,7 +96,7 @@
                 <td>
                     <a href="{% url 'patient-detail' %}" class="btn btn-info">Stat</a>
                     <a href="{% url 'patient-exercise-status' patient_id=patient.id %}" class="btn btn-success">Track</a>
-                    <a href="{% url 'prescription-page' %}" class="btn btn-info">Rx</a>
+                    <a href="{% url 'prescription-page' patient_id=patient.id %}" class="btn btn-info">Rx</a>
                     <a href="{% url 'exercise-selectable' patient_id=patient.id %}" class="btn btn-success">Exe</a>
                 </td>
             </tr>

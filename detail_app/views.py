@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from datetime import date
-from personal_account.models import AddPatient
+from personal_account.models import AddPatient, Clinic
 from exercise_app.models import Prescription,PrescriptionExercise
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
@@ -18,6 +18,9 @@ def patient_exercise_status(request, patient_id):
    
     """View to display all prescriptions for a patient"""
     patient = get_object_or_404(AddPatient, id=patient_id)
+    # clinic_id = patient.origin_clinic.id   # Get clinic ID from patient
+    # clinic_id = patient.origin_clinic.id if patient.origin_clinic else '',
+    clinic_id = patient.origin_clinic.id if patient.origin_clinic else None
     prescriptions = Prescription.objects.filter(patient=patient).order_by('-created_at')
 
     
@@ -56,6 +59,7 @@ def patient_exercise_status(request, patient_id):
         'total_prescriptions': total_prescriptions,
         'active_prescriptions': active_prescriptions,
         'completed_prescriptions': completed_prescriptions,
+        'clinic_id': clinic_id,
         'today': date.today(),
     }
     

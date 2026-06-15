@@ -244,21 +244,37 @@ body {
         transform: translateX(0);
     }
 }
+
 .header {
+    display: inline-block;
     background: white;
     border-radius: 15px;
     padding: 25px;
     margin-bottom: 25px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-decoration: None;
 }
 
 .header h1 {
+    display: inline-block;
     color: #333;
     margin-bottom: 10px;
+    text-decoration: None;
 }
 
 .header p {
+    display: inline-block;
     color: #666;
+    text-decoration: None;
+}
+
+.header a {
+    text-decoration: none;
+    display: inline-block;   /* or block */
+    color: inherit;          /* optional: keep default text color */
+}
+.header a:hover {
+    text-decoration: none;   /* ensure no underline on hover */
 }
 
 /* Responsive */

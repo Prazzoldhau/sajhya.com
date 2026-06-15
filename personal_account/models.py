@@ -15,6 +15,7 @@ class AddPatient(models.Model):
     patient_code = models.CharField(max_length=14, editable=False, unique=True)
     patient_name = models.CharField(max_length=50)
     patient_contact = models.CharField(max_length=50)
+    completed_session = models.IntegerField(default=0)
     patient_diagnosis = models.CharField(max_length=100)
     
     # Foreign key points to the user who created the patient
