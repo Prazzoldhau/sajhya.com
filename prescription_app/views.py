@@ -9,6 +9,8 @@ from django.views.decorators.http import require_http_methods
 from django.shortcuts import get_object_or_404
 from .models import TreatmentSession, Modality, TreatmentSessionModality
 import json
+from django.urls import reverse
+
 
 # Create your views here.
 def start_prescription(request, patient_id):
@@ -80,8 +82,10 @@ def save_treatment_session(request):
             if redirectTarget == 'exercise':
                 next_url = f"/exercise-app/exercise-selectable/{patient.id}/"
             elif redirectTarget == 'return':
-                # Example: back to clinic dashboard
-                next_url = f"/personal-acc/assigned-clinic-dashboard/{clinic_id}/"
+                if clinic_id:
+                    next_url = reverse('assigned-clinic-dashboard', args=[clinic_id])
+                else:
+                    next_url = reverse('personal-dashboard')
             else:
                 # If a custom URL is provided directly
                 next_url = redirectTarget

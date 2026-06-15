@@ -310,7 +310,7 @@
             {% if clinic_id %}
                 <a href="{% url 'assigned-clinic-dashboard' clinic_id=clinic_id %}" class="btn btn-secondary">Clinic Page</a>
             {% else %}
-                <button class="btn btn-secondary" disabled title="No clinic assigned">Clinic Page</button>
+                <a href = "{% url 'personal-dashboard' %}" class="btn btn-secondary">Clinic Page</a>
             {% endif %}
            
         </div>
