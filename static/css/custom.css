@@ -269,7 +269,7 @@ body {
 }
 
 .header a {
-    text-decoration: none;
+    text-decoration: None;
     display: inline-block;   /* or block */
     color: inherit;          /* optional: keep default text color */
 }

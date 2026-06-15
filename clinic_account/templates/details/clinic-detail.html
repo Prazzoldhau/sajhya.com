@@ -91,7 +91,7 @@
                     <td>
                         <a href="{% url 'patient-detail' %}" class="btn btn-info">Stat</a>
                         <a href="{% url 'patient-exercise-status' patient_id=patient.id %}" class="btn btn-success">Track</a>
-                        <a href="{% url 'prescription-page' %}" class="btn btn-info">Rx</a>
+                        <a href="{% url 'prescription-page' patient_id=patient.id %}" class="btn btn-info">Rx</a>
                         <a href="{% url 'exercise-selectable' patient_id=patient.id %}" class="btn btn-success">Exe</a>
                     </td>
                 </tr>
