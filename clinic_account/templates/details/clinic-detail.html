@@ -57,14 +57,14 @@
         <button onclick="clearSearch()">Clear</button>
     </div>
 
-    <!-- Date Range Filter -->
+    {% comment %} <!-- Date Range Filter -->
     <div class="search-container">
         📅 Date Range:
         <input type="date" id="fromDate">
         to
         <input type="date" id="toDate">
         <button onclick="filterByDate()">Apply</button>
-    </div>
+    </div> {% endcomment %}
 
     <!-- Patients Table -->
     {% if patients %}
@@ -72,22 +72,22 @@
         <table class="patient-table">
             <thead>
                 <tr>
-                    <th>Patient Code</th>
+                    {% comment %} <th>Patient Code</th> {% endcomment %}
                     <th>Full Name</th>
                     <th>Diagnosis</th>
-                    <th>Contact</th>
-                    <th>Added On</th>
+                    {% comment %} <th>Contact</th> {% endcomment %}
+                    {% comment %} <th>Added On</th> {% endcomment %}
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for patient in patients %}
                 <tr>
-                    <td>{{ patient.patient_code }}</td>
+                    {% comment %} <td>{{ patient.patient_code }}</td> {% endcomment %}
                     <td><strong>{{ patient.patient_name }}</strong></td>
                     <td>{{ patient.patient_diagnosis|default:"-" }}</td>
-                    <td>{{ patient.patient_contact|default:"-" }}</td>
-                    <td>{{ patient.created_at|date:"Y-m-d"|default:"-" }}</td>
+                    {% comment %} <td>{{ patient.patient_contact|default:"-" }}</td> {% endcomment %}
+                    {% comment %} <td>{{ patient.created_at|date:"Y-m-d"|default:"-" }}</td> {% endcomment %}
                     <td>
                         <a href="{% url 'patient-detail' %}" class="btn btn-info">Stat</a>
                         <a href="{% url 'patient-exercise-status' patient_id=patient.id %}" class="btn btn-success">Track</a>
@@ -140,9 +140,10 @@ document.addEventListener('DOMContentLoaded', function() {
 function searchPatients() {
     let searchType = document.getElementById('searchType').value;
     let searchValue = document.getElementById('searchValue').value;
-    let fromDate = document.getElementById('fromDate').value;
-    let toDate = document.getElementById('toDate').value;
-    let url = `?search_type=${searchType}&search_value=${searchValue}&from_date=${fromDate}&to_date=${toDate}`;
+    //let fromDate = document.getElementById('fromDate').value;
+    //let toDate = document.getElementById('toDate').value;
+    //let url = `?search_type=${searchType}&search_value=${searchValue}&from_date=${fromDate}&to_date=${toDate}`;
+    let url = `?search_type=${searchType}&search_value=${searchValue}`;
     window.location.href = url;
 }
 

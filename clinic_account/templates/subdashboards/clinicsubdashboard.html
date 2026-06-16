@@ -27,22 +27,22 @@
         <table class="patient-table">
             <thead>
                 <tr>
-                    <th>Clinic Code</th>
+                    {% comment %} <th>Clinic Code</th> {% endcomment %}
                     <th>Name</th>
-                    <th>PAN Number</th>
+                    {% comment %} <th>PAN Number</th> {% endcomment %}
                     <th>Contact</th>
-                    <th>Created At</th>
+                    {% comment %} <th>Created At</th> {% endcomment %}
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for clinic in clinics %}
                 <tr>
-                    <td>{{ clinic.clinic_code }}</td>
+                    {% comment %} <td>{{ clinic.clinic_code }}</td> {% endcomment %}
                     <td><strong>{{ clinic.clinic_name }}</strong></td>
-                    <td>{{ clinic.pan_number|default:"-" }}</td>
+                    {% comment %} <td>{{ clinic.pan_number|default:"-" }}</td> {% endcomment %}
                     <td>{{ clinic.phone|default:"-" }}</td>
-                    <td>{{ clinic.created_at|date:"Y-m-d"|default:"-" }}</td>
+                    {% comment %} <td>{{ clinic.created_at|date:"Y-m-d"|default:"-" }}</td> {% endcomment %}
                     <td>
                         <a href="{% url 'clinic-detail' clinic.id %}" class="btn btn-info">View Details</a>
                         {% comment %} <a href="#" class="btn btn-info">View Details</a> {% endcomment %}
