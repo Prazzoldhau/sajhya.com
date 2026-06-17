@@ -191,6 +191,10 @@
 
         /* Tables */
         .data-table {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             width: 100%;
             border-collapse: collapse;
         }
@@ -200,12 +204,12 @@
             padding: 12px;
             text-align: left;
             border-bottom: 1px solid #f0f0f0;
+            
         }
 
         .data-table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #333;
+            background: #667eea;
+            color: white;
         }
 
         .data-table tr:hover {
@@ -279,13 +283,15 @@
         </div>
 
         <!-- Sessions Tab -->
-        <div id="sessions-tab" class="tab-content active">
+        {% comment %} <div id="sessions-tab" class="tab-content active"> {% endcomment %}
+        <div class = "table-responsive">
             {% if sessions %}
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Progress</th>
+                        <th>Sessions</th>
+                        <th>Rx Response</th>
                     </tr>
                 </thead>
                 <tbody>
