@@ -48,7 +48,7 @@ class TreatmentSession(models.Model):
         ordering = ['-session_date']
     
     def __str__(self):
-        return f"Session {self.session_number} - {self.patient.patient_full_name}"
+        return f"Session {self.session_number} - {self.patient.patient_name}"
 
 class Modality(models.Model):
     """Predefined list of modalities (e.g., IFT, TENS, Ultrasound)"""

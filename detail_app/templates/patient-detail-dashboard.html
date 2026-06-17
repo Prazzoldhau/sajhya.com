@@ -262,26 +262,20 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            <h1 class="patient-title">👨‍⚕️ {{ patient.patient_full_name }}</h1>
-            <p class="patient-code">ID: {{ patient.enrollment_id|default:"Not assigned" }}</p>
-            <p class="patient-code">📞 {{ patient.contact_number|default:"No contact" }} | 🚻 {{ patient.get_gender_display|default:"Not specified" }}</p>
-            {% if patient.diagnosis %}
+            <h1 class="patient-title">👨‍⚕️ {{ patient.patient_name }}</h1>
+            {% comment %} <p class="patient-code">ID: {{ patient.enrollment_id|default:"Not assigned" }}</p>
+            <p class="patient-code">📞 {{ patient.contact_number|default:"No contact" }} | 🚻 {{ patient.get_gender_display|default:"Not specified" }}</p>{% endcomment %}
+            {% if patient.diagnosis %} 
             <p class="diagnosis"><strong>Diagnosis:</strong> {{ patient.diagnosis }}</p>
             {% endif %}
         </div>
 
-        <!-- Success Message -->
-        {% if messages %}
-        <div class="alert">
-            ✅ Treatment session saved successfully!
-        </div>
-        {% endif %}
-        
+
         <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('sessions')">📅 Exercise History</button>
-            <button class="tab-btn" onclick="switchTab('modalities')">⚡ Modalities Summary</button>
-            <button class="tab-btn" onclick="switchTab('progress')">📈 Progress Tracking</button>
+            {% comment %} <button class="tab-btn" onclick="switchTab('modalities')">⚡ Modalities Summary</button>
+            <button class="tab-btn" onclick="switchTab('progress')">📈 Progress Tracking</button> {% endcomment %}
         </div>
 
         <!-- Sessions Tab -->
@@ -298,23 +292,8 @@
                     {% for session in sessions %}
                     <tr>
                         <td>{{ session.session_date|date:"Y-m-d H:i" }}</td>
-                        <td>{% if session.pain_level %}{{ session.pain_level }}/10{% else %}-{% endif %}</td>
-                        <td>
-                            {% if session.progress_status == 'much_better' %}🌟 Much Better
-                            {% elif session.progress_status == 'better' %}✅ Better
-                            {% elif session.progress_status == 'same' %}➡️ Same
-                            {% elif session.progress_status == 'worse' %}⚠️ Worse
-                            {% elif session.progress_status == 'much_worse' %}🔻 Much Worse
-                            {% else %}-{% endif %}
-                        </td>
-                        <td>
-                            <div class="modalities-list">
-                                {% for modality in session.modalities_list %}
-                                <span class="modality-badge">{{ modality.name }}</span>
-                                {% endfor %}
-                            </div>
-                        </td>
-                        <td>{{ session.session_note|truncatechars:50|default:"-" }}</td>
+                        <td>{{ session.session_number }}</td>
+                        <td>{{ session.treatment_response }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -327,7 +306,7 @@
             {% endif %}
         </div>
 
-        <!-- Modalities Tab -->
+        {% comment %} <!-- Modalities Tab -->
         <div id="modalities-tab" class="tab-content">
             <h3>⚡ Most Used Modalities</h3>
             <table class="data-table">
@@ -387,7 +366,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
+        </div> {% endcomment %}
     </div>
 
     <script>

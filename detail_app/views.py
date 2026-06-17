@@ -7,11 +7,23 @@ from django.views.decorators.http import require_http_methods
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from prescription_app.models import TreatmentSession
 
 
 # Create your views here.
-def patient_detail(request):
-    return render (request, 'patient-detail-dashboard.html')
+def patient_detail(request, patient_id):
+    patient = get_object_or_404(AddPatient, id=patient_id)
+    sessions = TreatmentSession.objects.filter(patient_id=patient_id).only(
+        'session_date', 'session_number', 'treatment_response'
+    )
+    # Or even simpler, use the related manager:
+    # sessions = patient.sessions.all()  # because related_name='sessions'
+    
+    context = {
+        "sessions": sessions,
+        "patient": patient
+    }
+    return render(request, 'patient-detail-dashboard.html', context)
 
 
 def patient_exercise_status(request, patient_id):

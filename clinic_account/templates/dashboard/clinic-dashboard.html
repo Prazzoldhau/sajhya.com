@@ -94,7 +94,7 @@
                 <td>{{ patient.patient_diagnosis|default:"-" }}</td>
                 {% comment %} <td>{{ patient.patient_contact|default:"-" }}</td> {% endcomment %}
                 <td>
-                    <a href="{% url 'patient-detail' %}" class="btn btn-info">Stat</a>
+                    <a href="{% url 'patient-detail' patient_id=patient.id %}" class="btn btn-info">Stat</a>
                     <a href="{% url 'patient-exercise-status' patient_id=patient.id %}" class="btn btn-success">Track</a>
                     <a href="{% url 'prescription-page' patient_id=patient.id %}" class="btn btn-info">Rx</a>
                     <a href="{% url 'exercise-selectable' patient_id=patient.id %}" class="btn btn-success">Exe</a>
