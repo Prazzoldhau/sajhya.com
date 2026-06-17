@@ -194,3 +194,25 @@ def patient_prescriptions_view(request, patient_id):
 
 def session_detail(request):
     return render (request, 'session-details.html')
+
+
+
+
+
+
+def add_edit_exercise(request, patient_id):
+    patient = get_object_or_404(AddPatient, id=patient_id)
+
+    # 1. Get the most recent prescription for this patient (latest created_at)
+    latest_prescription = Prescription.objects.filter(patient=patient).order_by('-created_at').first()
+
+    # 2. Fetch exercises only if a prescription exists
+    exercises = []
+    if latest_prescription:
+        # If you have a ManyToMany field named 'exercises' on Prescription:
+        exercises = latest_prescription.exercises.all().order_by('order')
+        
+        # If Exercise has a ForeignKey to Prescription (named 'prescription'):
+        # exercises = Exercise.objects.filter(prescription=latest_prescription).order_by('order')
+
+    return render(request, 'addexercise/add-exercise.html', {'exercises': exercises})

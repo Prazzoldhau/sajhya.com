@@ -8,6 +8,7 @@ urlpatterns = [
    path ('prescription-exercise-details/', views.prescription_exercise_details, name = "prescription-exercise-details"),
    path ('prescriptipn/<int:patient_id>/', views.patient_prescriptions_view, name='patient_prescriptions'),
    path ('session-details/', views.session_detail, name="session-details"),
+   path ('edit-reassign-exercise/<int:patient_id>/', views.add_edit_exercise, name="add-edit-exercise"),
 ]
 
 

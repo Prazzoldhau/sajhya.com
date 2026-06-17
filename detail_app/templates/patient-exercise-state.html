@@ -230,11 +230,15 @@
         .btn-primary {
             background: #667eea;
             color: white;
+            text-decoration: None;
+            display: inline-block;
         }
 
         .btn-primary:hover {
             background: #5a67d8;
             transform: translateY(-2px);
+            text-decoration: None;
+            display: inline-block;
         }
 
         .btn-secondary {
@@ -333,6 +337,9 @@
                     <p><strong>Patient Code:</strong> {{ patient.patient_code }}</p>
                     <p><strong>Diagnosis:</strong> {{ patient.diagnosis|default:"Not specified" }}</p>
                 </div>
+
+                <a href="{% url 'add-edit-exercise' patient_id=patient.id %}" class="btn btn-primary"> Reassign Exercise </a>
+                
                 {% comment %} <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number">{{ total_prescriptions }}</div>

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Clinic List{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <div>
+        <p> </p>
+    </div>
+    {% if exercises %}
+        <table class="patient-table">
+            <thead>
+                <tr>
+                    <th>SN</th>
+                    <th>Exercises</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exercise in exercises %}
+                    <tr>
+                        <td><strong>{{ forloop.counter }}</strong></td>
+                        <td>{{ exercise.exercise_name }}</td>
+                        <td>
+                            <a href="#" class="btn btn-success">-</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        
+        </table>
+    <br>
+    <a href="#" class="btn btn-success">Add More</a>
+    <a href="#" class="btn btn-success">Prescribe</a>
+    {% else %}
+        <p>No exercises available.</p>
+    {% endif %}
+</div>
+{% endblock %}  
