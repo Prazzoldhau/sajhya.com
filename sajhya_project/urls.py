@@ -15,7 +15,7 @@ urlpatterns = [
     path ('detail-app/', include('detail_app.urls')),
     path ('video-app/', include('video_app.urls')),
     path ('prescription-app/', include('prescription_app.urls')),
-    # path ('patient-app/', include('patient_app.urls')),
+    path ('patient-app/', include('patient_app.urls')),
 
 ]
 

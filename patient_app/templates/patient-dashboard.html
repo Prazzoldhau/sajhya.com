@@ -1,0 +1,212 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercise Prescriptions - {{ patient.patient_full_name }}</title>
+    <link rel="stylesheet" href="{% static 'css/patient-portal.css' %}"> 
+</head>
+<body>
+    <div class="container">    
+        <div class="header">
+            <div class="patient-info">
+                <div class="patient-details">
+                    <h1>{{ patient.patient_name }}</h1>
+                    <p><strong>Diagnosis:</strong> {{ patient.diagnosis|default:"Not specified" }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Prescriptions List -->
+        {% if latest_prescription %}
+            <div class="prescription-card" data-prescription-id="{{ latest_prescription.id }}">    
+                <div class="prescription-header" onclick="togglePrescription(0)">
+                    <div class="prescription-title">
+                        <h3>
+                            Prescription {{ latest_prescription.created_at|date:"F j, Y" }}
+                        </h3>
+                    </div>
+                    <div class="prescription-status">
+                        <span class="status-badge status-{{ latest_prescription.status|default:'active' }}">
+                            {{ latest_prescription.status|default:"Active"|title }}
+                        </span>
+                        <div style="display: flex; align-items: center;">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <span class="progress-text">0/{{ exercises|length }}</span>
+                        </div>
+                        <span class="toggle-icon">▼</span>
+                    </div>
+                </div>
+                
+                <div class="prescription-body" id="prescription-body-0">
+                    <table class="exercises-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px">Done</th>
+                                <th>Exercise</th>
+                                <th>Difficulty</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for exercise in exercises %}
+                            <tr>
+                                <td>
+                                    <input type="checkbox" 
+                                           class="checkbox-complete" 
+                                           data-exercise-id="{{ exercise.id }}"
+                                           {% if exercise.is_completed %}checked{% endif %}
+                                           onchange="toggleExerciseCompletion({{ exercise.id }}, this)">
+                                </td>
+                                <td><strong>{{ exercise.exercise_name }}</strong></td>
+                                <td>
+                                    <span class="difficulty difficulty-{{ exercise.difficulty_level }}">
+                                        Level {{ exercise.difficulty_level }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if exercise.is_completed %}
+                                        <span class="exercise-completed">✅ Completed</span>
+                                    {% else %}
+                                        <span class="exercise-pending">⏳ Pending</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% if exercise.exercise_notes %}
+                            <tr>
+                                <td colspan="4" style="background: #fff3cd; padding: 10px 15px;">
+                                    <strong>📝 Note:</strong> {{ exercise.exercise_notes }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 20px;">
+                                    No exercises assigned in this prescription.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    {% if latest_prescription.prescription_notes %}
+                    <div style="padding: 15px 25px; background: #e3f2fd; margin-top: 10px;">
+                        <strong>📋 Prescription Notes:</strong><br>
+                        {{ latest_prescription.prescription_notes }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>📋 No Prescriptions Yet</h3>
+                <p>You do not have any exercise prescriptions.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <style>
+        /* Your styles */
+        .difficulty {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .difficulty-1 { background: #4caf50; color: white; }
+        .difficulty-2 { background: #8bc34a; color: white; }
+        .difficulty-3 { background: #ff9800; color: white; }
+        .difficulty-4 { background: #f44336; color: white; }
+        .difficulty-5 { background: #9c27b0; color: white; }
+        
+        .prescription-body { display: none; }
+        .prescription-body.open { display: block; }
+        .toggle-icon.rotated { transform: rotate(180deg); }
+    </style>
+
+    <script>
+        function togglePrescription(index) {
+            const body = document.getElementById(`prescription-body-${index}`);
+            const icon = body?.previousElementSibling?.querySelector('.toggle-icon');
+            if (body) body.classList.toggle('open');
+            if (icon) icon.classList.toggle('rotated');
+        }
+
+        async function toggleExerciseCompletion(exerciseId, checkbox) {
+            checkbox.disabled = true;
+            try {
+                const response = await fetch(`/detail-app/api/exercise/${exerciseId}/toggle-completion/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    body: JSON.stringify({ is_completed: checkbox.checked })
+                });
+                const data = await response.json();
+                if (!data.success) {
+                    checkbox.checked = !checkbox.checked;
+                    alert(data.error || 'Failed to update exercise status');
+                    return;
+                }
+                // Update progress bar and text here
+                const card = document.querySelector(`.prescription-card[data-prescription-id="${data.prescription_id}"]`);
+                if (card) {
+                    const progressText = card.querySelector('.progress-text');
+                    if (progressText) {
+                        progressText.textContent = `${data.completed_exercises}/${data.total_exercises}`;
+                    }
+                    const progressBar = card.querySelector('.progress-bar');
+                    if (progressBar) {
+                        progressBar.style.width = `${data.progress_percentage}%`;
+                    }
+                }
+                // Update the status text in the row
+                const row = checkbox.closest('tr');
+                if (row) {
+                    const statusCell = row.querySelector('td:last-child');
+                    if (statusCell) {
+                        statusCell.innerHTML = checkbox.checked 
+                            ? '<span class="exercise-completed">✅ Completed</span>'
+                            : '<span class="exercise-pending">⏳ Pending</span>';
+                    }
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                checkbox.checked = !checkbox.checked;
+                alert('Error updating exercise status');
+            } finally {
+                checkbox.disabled = false;
+            }
+        }
+
+        function getCsrfToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstPrescription = document.getElementById('prescription-body-0');
+            if (firstPrescription) {
+                firstPrescription.classList.add('open');
+                const icon = document.querySelector('.prescription-header .toggle-icon');
+                if (icon) icon.classList.add('rotated');
+            }
+        });
+    </script>
+</body>
+</html>
