@@ -360,52 +360,16 @@ document.addEventListener('DOMContentLoaded', function() {
         updateSelectionSummary();
     }
     
-    function openPrescriptionModal() {
-        if (window.selectedExercises.length === 0) return;
-        
-        const modal = document.getElementById('prescriptionModal');
-        const modalList = document.getElementById('modalExercisesList');
-        
-        if (!modal || !modalList) return;
-        
-        modalList.innerHTML = window.selectedExercises.map(exercise => `
-            <div class="exercise-preview">
-                <h4>${escapeHtml(exercise.exercise_name)}</h4>
-                <p><strong>Difficulty:</strong> ${getDifficultyText(exercise.difficulty_level || 1)}</p>
-                <div class="form-group-modal">
-                    <label>Custom Sets (Optional):</label>
-                    <input type="number" id="custom_sets_${exercise.id}" placeholder="Leave empty for default" min="1" max="10">
-                </div>
-                <div class="form-group-modal">
-                    <label>Custom Reps (Optional):</label>
-                    <input type="number" id="custom_reps_${exercise.id}" placeholder="Leave empty for default" min="1" max="50">
-                </div>
-            </div>
-        `).join('');
-        
-        modal.style.display = 'flex';
-    }
     
-    function closePrescriptionModal() {
-        const modal = document.getElementById('prescriptionModal');
-        if (modal) modal.style.display = 'none';
-    }
-    
+
     async function submitPrescription() {
         const prescriptionData = {
             patient_id: window.patientId,
-            patient_code: window.patientCode,
             exercises: window.selectedExercises.map(exercise => ({
                 exercise_id: exercise.id,
                 exercise_name: exercise.exercise_name,
-                custom_sets: document.getElementById(`custom_sets_${exercise.id}`)?.value || null,
-                custom_reps: document.getElementById(`custom_reps_${exercise.id}`)?.value || null,
                 difficulty_level: exercise.difficulty_level,
-                exercise_type: exercise.exercise_type
             })),
-            notes: document.getElementById('prescriptionNotes')?.value || '',
-            start_date: document.getElementById('startDate')?.value || '',
-            duration_days: parseInt(document.getElementById('duration')?.value || '30')
         };
         
         try {
@@ -465,8 +429,6 @@ document.addEventListener('DOMContentLoaded', function() {
     window.loadMoreExercises = loadMoreExercises;
     window.showLessExercises = showLessExercises;
     window.clearAllSelections = clearAllSelections;
-    window.openPrescriptionModal = openPrescriptionModal;
-    window.closePrescriptionModal = closePrescriptionModal;
     window.submitPrescription = submitPrescription;
     
     console.log('Exercise selectable JS loaded with append-only loading');

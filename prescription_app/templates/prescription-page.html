@@ -161,10 +161,10 @@
 
 
     <!-- Pre-session -->
-    <div class="selection-card">
+    {% comment %} <div class="selection-card">
         <h3>📝 Pre-Session Assessment</h3>
         <div class="form-group"><label>📄 Pre-session notes</label><textarea id="preNotes" name="pre_notes" rows="2"></textarea></div>
-    </div>
+    </div> {% endcomment %}
 
     <!-- Modalities Grid -->
     <div class="selection-card">
@@ -179,7 +179,7 @@
 
     <!-- Post-session -->
     <div class="selection-card">
-        <h3>📈 Post-Session Assessment</h3>
+        {% comment %} <h3>📈 Post-Session Assessment</h3> {% endcomment %}
         <div class="grid-2col">
             <div class="form-group"><label>📊 Treatment Response</label>
                 <select id="response" name="treatment_response">
@@ -237,21 +237,11 @@
 <script>
     // ======================== MODALITIES MASTER LIST ========================
     const modalities = [
-        { id: "tens", name: "TENS", params: [{ name: "Frequency", default: "100 Hz" }, { name: "Pulse Width", default: "100 µs" }, { name: "Duration (min)", default: "15", type: "number" }] },
-        { id: "us", name: "Ultrasound", params: [{ name: "Frequency (MHz)", default: "1" }, { name: "Duty Cycle", default: "50%" }, { name: "Intensity", default: "0.8 W/cm²" }, { name: "Duration (min)", default: "5", type: "number" }] },
-        { id: "dry_needling", name: "Dry Needling", params: [{ name: "Technique", default: "Superficial" }, { name: "Points", default: "4" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "cupping", name: "Cupping", params: [{ name: "Pressure", default: "Medium" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "neuro-rehab", name: "neuro-rehab", params: [{ name: "Duration (min)", default: "60", type: "number" }] },
-        { id: "manual_therapy", name: "Manual Therapy", params: [{ name: "Techniques", default: "Mobilization" }, { name: "Duration (min)", default: "15", type: "number" }] },
-        { id: "traction", name: "Traction", params: [{ name: "Force (kg)", default: "15" }, { name: "Duration (min)", default: "12", type: "number" }] },
-        { id: "ift", name: "IFT", params: [{ name: "Carrier Frequency", default: "4000 Hz" }, { name: "Beat Frequency", default: "100 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "russian", name: "Russian Current", params: [{ name: "Carrier Freq", default: "2500 Hz" }, { name: "Burst Rate", default: "50 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "laser", name: "Laser Therapy", params: [{ name: "Wavelength", default: "810 nm" }, { name: "Power", default: "5 W" }, { name: "Duration (min)", default: "8", type: "number" }] },
-        { id: "iastm", name: "IASTM", params: [{ name: "Tool", default: "Stainless" }, { name: "Duration (min)", default: "8", type: "number" }] },
-        { id: "ems", name: "Muscle Stim", params: [{ name: "Frequency", default: "50 Hz" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "cpm", name: "CPM", params: [{ name: "Range", default: "0-90°" }, { name: "Duration (min)", default: "20", type: "number" }] },
-        { id: "tecar", name: "TECAR", params: [{ name: "Mode", default: "Capacitive" }, { name: "Duration (min)", default: "10", type: "number" }] },
-        { id: "shockwave", name: "Shockwave", params: [{ name: "Pressure (bar)", default: "3" }, { name: "Shots", default: "2000", type: "number" }, { name: "Duration (min)", default: "8", type: "number" }] }
+        { id: "electrotherapy", name: "Electrotherapy", params: [{ name: "TENS", default: "20mins" }, { name: "USG", default: "5min" }, { name: "Traction", default: "15min" }] },
+        { id: "soft-tissue", name: "Soft Tissue Work", params: [{ name: "Manual Therapy", default: "Maitland" }, { name: "IASTM", default: "SS" }, { name: "Dry Needling", default: "0.25mm"},  { name: "Cupping", default: "dry cupping" }] },
+        { id: "mobilization", name: "Mobilization", params: [{ name: "Mulligan", default: "mild" }, { name: "Maitland", default: "moderate" }, { name: "HLVMT", default: "High Intensity" }]},
+        { id: "exercisetherapy", name: "Exercise Therapy", params: [{ name: "Therapeutic Exercise", default: "Low Intensity" }, { name: "Functional Exercise", default: "Intense" }, { name: "Strength & Conditioning", default: "High Intensity"}] },
+        { id: "rehab", name: "Rehab", params: [{ name: "Neuro Rehab", default: "1.5 hour" }, { name: "Orhto Rehab", default: "1 hour" }, { name: "Pediatric Rehab", default: "1 hour"}] },
     ];
 
     let selectedModalities = [];
@@ -420,7 +410,7 @@
         const sessionData = {
             patient_id: parseInt(document.getElementById("patientId").value),
             session_number: parseInt(document.getElementById("sessionNumber").value),
-            pre_notes: document.getElementById("preNotes").value,
+            //pre_notes: document.getElementById("preNotes").value,
             modalities: selectedModalities,
             treatment_response: document.getElementById("response").value,
             redirect_to: redirectTarget          // <-- NEW field

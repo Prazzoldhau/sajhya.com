@@ -11,17 +11,16 @@
 <body>
     
     <div class="container">
-        <div class="header">
-            <h1>Exercise Prescription</h1>
-            <h3 id="patientNameDisplay">{{ patient.patient_name }}</h3>
-            <p>{{ patient.patient_code }} | {{ patient.patient_diagnosis }}</p>
-        </div>
+        <div class="navbar">
+            <div class="empty-state-header">
+                <h3 id="patientNameDisplay">{{ patient.patient_name }}</h3>
+                <p>{{ patient.patient_diagnosis }}</p>
+            </div>
 
-        <div class="selection-card">
             <div class="form-group">
-                <label for="subRegionSelect">Select Sub-Region:</label>
+                
                 <select id="subRegionSelect">
-                    <option value="">-- Choose a sub-region --</option>
+                    <option value="">Exercises</option>
                     {% for sub_region in sub_regions %}
                         <option value="{{ sub_region.id }}">
                             {{ sub_region.sub_region_name }}
@@ -29,6 +28,7 @@
                     {% endfor %}
                 </select>
             </div>
+            
         </div>
 
         <div class="loader" id="loader">
@@ -54,49 +54,15 @@
             <div class="selected-exercises-list" id="selectedExercisesList"></div>
             <div class="action-buttons">
                 <button class="btn btn-secondary" onclick="clearAllSelections()">Clear All</button>
-                <button class="btn btn-primary" onclick="openPrescriptionModal()" id="prescribeBtn" disabled>Prescribe Selected Exercises</button>
+                <button class="btn btn-primary" onclick="submitPrescription()">Prescribe Selected Exercises</button>
             </div>
         </div>
     </div>
 
-    <!-- Prescription Modal -->
-    <div id="prescriptionModal" class="prescription-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Prescribe Exercises</h2>
-                <p>Patient: {{ patient.patient_full_name }}</p>
-            </div>
-            <div id="modalExercisesList"></div>
-            <div class="form-group-modal">
-                <label for="prescriptionNotes">Prescription Notes (Optional):</label>
-                <textarea id="prescriptionNotes" rows="3" placeholder="Add any special instructions or notes..."></textarea>
-            </div>
-            <div class="form-group-modal">
-                <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" value="{{ today_date|default:'' }}">
-            </div>
-            <div class="form-group-modal">
-                <label for="duration">Duration (days):</label>
-                <input type="number" id="duration" value="30" min="1" max="365">
-            </div>
-            <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="closePrescriptionModal()">Cancel</button>
-                <button class="btn btn-success" onclick="submitPrescription()">Submit Prescription</button>
-            </div>
-        </div>
-    </div>
+   
+   
 
     <script>
-                // Global variables
-        {% comment %} let selectedExercises = [];
-        let currentExercises = [];
-        let subRegionSelect = document.getElementById('subRegionSelect');
-        let exercisesContainer = document.getElementById('exercisesContainer');
-        let loader = document.getElementById('loader');
-        let stats = document.getElementById('stats');
-        let prescribeBtn = document.getElementById('prescribeBtn');
-        let patientCode = '{{ patient_code }}';
-        let patientId = {{ patient.id|default:'null' }}; {% endcomment %}
         window.patientCode = '{{ patient_code }}';
         window.patientId = {{ patient.id|default:'null' }};
         window.selectedExercises = [];

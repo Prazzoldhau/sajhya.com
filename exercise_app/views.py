@@ -7,6 +7,10 @@ from django.utils import timezone   # Django's timezone has .now()
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+
 
 
 
@@ -48,9 +52,9 @@ def submit_prescription(request):
         
         patient_id = data.get('patient_id')
         exercises_data = data.get('exercises', [])
-        notes = data.get('notes', '')
-        start_date = data.get('start_date')
-        duration_days = data.get('duration_days', 30)
+        # notes = data.get('notes', '')
+        # start_date = data.get('start_date')
+        # duration_days = data.get('duration_days', 30)
         
         # Validate required data
         if not patient_id:
@@ -75,19 +79,19 @@ def submit_prescription(request):
             }, status=404)
         
         # Parse dates
-        if start_date:
-            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
-        else:
-            start_date_obj = timezone.now().date()
+        # if start_date:
+        #     start_date_obj = datetime.strptime(start_date, '%Y-%m-%d').date()
+        # else:
+        #     start_date_obj = timezone.now().date()
         
-        end_date_obj = start_date_obj + timedelta(days=duration_days)
+        # end_date_obj = start_date_obj + timedelta(days=duration_days)
         
         # Create prescription
         prescription = Prescription.objects.create(
             patient=patient,
-            prescription_notes=notes,
-            start_date=start_date_obj,
-            end_date=end_date_obj,
+            # prescription_notes=notes,
+            # start_date=start_date_obj,
+            # end_date=end_date_obj,
             status='active',
             created_by=request.user if request.user.is_authenticated else None
         )
@@ -108,13 +112,14 @@ def submit_prescription(request):
                 exercise=exercise_obj,  # Can be None if exercise was deleted from library
                 exercise_id_in_library=exercise_id,
                 exercise_name=ex_data.get('exercise_name', 'Unknown Exercise'),
-                exercise_type=ex_data.get('exercise_type', 'General'),
-                sets=ex_data.get('custom_sets') or ex_data.get('default_sets', 3),
-                reps=ex_data.get('custom_reps') or ex_data.get('default_reps', 10),
                 difficulty_level=ex_data.get('difficulty_level', 1),
-                hold_time_sec=ex_data.get('hold_time_sec', 0),
-                exercise_notes=ex_data.get('notes', ''),
                 order=index
+                # exercise_type=ex_data.get('exercise_type', 'General'),
+                # sets=ex_data.get('custom_sets') or ex_data.get('default_sets', 3),
+                # reps=ex_data.get('custom_reps') or ex_data.get('default_reps', 10),
+                # hold_time_sec=ex_data.get('hold_time_sec', 0),
+                # exercise_notes=ex_data.get('notes', ''),
+                
             )
         
         return JsonResponse({
@@ -124,8 +129,6 @@ def submit_prescription(request):
             'message': f'Successfully prescribed {len(exercises_data)} exercises to {patient.patient_name}',
             'prescription': {
                 'id': prescription.id,
-                'start_date': prescription.start_date.strftime('%Y-%m-%d'),
-                'end_date': prescription.end_date.strftime('%Y-%m-%d'),
                 'total_exercises': prescription.get_total_exercises()
             }
         })
@@ -167,8 +170,7 @@ def patient_prescriptions_view(request, patient_id):
         
         # Check if prescription is active
         today = date.today()
-        is_active = (prescription.status == 'active' and 
-                    prescription.start_date <= today <= prescription.end_date)
+        is_active = (prescription.status == 'active')
         
         prescriptions_data.append({
             'prescription': prescription,
@@ -177,7 +179,7 @@ def patient_prescriptions_view(request, patient_id):
             'completed_exercises': completed_exercises,
             'progress_percentage': round(progress_percentage, 1),
             'is_active': is_active,
-            'days_remaining': (prescription.end_date - today).days if is_active else 0
+          
         })
     
     context = {
@@ -198,8 +200,6 @@ def session_detail(request):
 
 
 
-
-
 def add_edit_exercise(request, patient_id):
     patient = get_object_or_404(AddPatient, id=patient_id)
 
@@ -211,8 +211,49 @@ def add_edit_exercise(request, patient_id):
     if latest_prescription:
         # If you have a ManyToMany field named 'exercises' on Prescription:
         exercises = latest_prescription.exercises.all().order_by('order')
+        print (f"{exercises}")
         
-        # If Exercise has a ForeignKey to Prescription (named 'prescription'):
-        # exercises = Exercise.objects.filter(prescription=latest_prescription).order_by('order')
-
     return render(request, 'addexercise/add-exercise.html', {'exercises': exercises})
+
+
+
+
+@login_required
+def reassign_exercise(request, patient_id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
+
+    try:
+        patient = AddPatient.objects.get(id=patient_id)
+    except AddPatient.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Patient not found'}, status=404)
+
+    # Get the latest prescription for this patient
+    latest = Prescription.objects.filter(patient=patient).order_by('-created_at').first()
+    if not latest:
+        return JsonResponse({
+            'success': False,
+            'error': 'No previous prescription found to copy from.'
+        }, status=400)
+
+    # Create a new prescription (copy status and user, or set as you wish)
+    with transaction.atomic():
+        new_prescription = Prescription.objects.create(
+            patient=patient,
+            status='active',                     # or copy from latest.status
+            created_by=request.user if request.user.is_authenticated else None
+        )
+
+        # Copy all PrescriptionExercise entries from the latest prescription
+        for old_pe in latest.exercises.all().order_by('order'):
+            PrescriptionExercise.objects.create(
+                prescription=new_prescription,
+                exercise=old_pe.exercise,
+                exercise_id_in_library=old_pe.exercise_id_in_library,
+                exercise_name=old_pe.exercise_name,
+                difficulty_level=old_pe.difficulty_level,
+                order=old_pe.order
+            )
+
+
+    return redirect(f'/detail-app/patient-exericse-status/{patient_id}/')

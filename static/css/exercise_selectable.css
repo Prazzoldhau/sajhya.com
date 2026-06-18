@@ -28,6 +28,51 @@ body {
     margin-bottom: 10px;
 }
 
+.navbar {
+    background: rgba(245, 245, 245, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin: 1rem 2rem 2rem 2rem;
+    
+    /* Circular edges */
+    border-radius: 10px;
+    
+    /* Optional: Add border */
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    
+    /* Transition for smooth hover effect */
+    transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.navbar:hover {
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.15);
+    background: rgba(255, 255, 255, 1);
+}
+
+.empty-state-header{
+    font-size: 1rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+
+
+/* Responsive - remove circular edges on mobile */
+@media (max-width: 768px) {
+    .navbar {
+        border-radius: 15px;
+        margin: 0 0 1rem 0;
+        padding: 1rem;
+    }
+}
 .selection-card {
     background: white;
     border-radius: 15px;

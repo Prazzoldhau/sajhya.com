@@ -100,9 +100,9 @@ class Prescription(models.Model):
 
     # Prescription details
     prescription_date = models.DateTimeField(auto_now_add=True)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    prescription_notes = models.TextField(blank=True, null=True)
+    # start_date = models.DateField()
+    # end_date = models.DateField()
+    # prescription_notes = models.TextField(blank=True, null=True)
     
     # Status and tracking
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
@@ -179,17 +179,17 @@ class PrescriptionExercise(models.Model):
         help_text="ID from the original exercise library in "
     )
     exercise_name = models.CharField(max_length=200)
-    exercise_type = models.CharField(max_length=100, blank=True, null=True)
+    # exercise_type = models.CharField(max_length=100, blank=True, null=True)
     difficulty_level = models.IntegerField(choices=DIFFICULTY_CHOICES, default=1)
     
-    # Exercise parameters (can be customized per prescription)
-    sets = models.IntegerField(default=3)
-    reps = models.IntegerField(default=10)
-    hold_time_sec = models.IntegerField(default=0, help_text="Hold time in seconds for isometric exercises")
-    rest_time_sec = models.IntegerField(default=60, help_text="Rest time between sets in seconds")
+    # # Exercise parameters (can be customized per prescription)
+    # sets = models.IntegerField(default=3)
+    # reps = models.IntegerField(default=10)
+    # hold_time_sec = models.IntegerField(default=0, help_text="Hold time in seconds for isometric exercises")
+    # rest_time_sec = models.IntegerField(default=60, help_text="Rest time between sets in seconds")
     
-    # Additional notes for this specific exercise
-    exercise_notes = models.TextField(blank=True, null=True)
+    # # Additional notes for this specific exercise
+    # exercise_notes = models.TextField(blank=True, null=True)
     
     # Order of exercises in the prescription
     order = models.IntegerField(default=0, help_text="Display order of exercises")
@@ -211,19 +211,19 @@ class PrescriptionExercise(models.Model):
         unique_together = ['prescription', 'exercise_id_in_library', 'order']
     
     def __str__(self):
-        return f"{self.exercise_name} - {self.sets}x{self.reps}"
+        return f"{self.exercise_name}"
     
-    def get_total_reps(self):
-        """Calculate total repetitions across all sets"""
-        return self.sets * self.reps
+    # def get_total_reps(self):
+    #     """Calculate total repetitions across all sets"""
+    #     return self.sets * self.reps
     
-    def get_duration_minutes(self):
-        """Estimate total duration for this exercise in minutes"""
-        # Assume 3 seconds per rep, plus rest time between sets
-        exercise_time = self.reps * 3  # seconds
-        rest_time = self.rest_time_sec * (self.sets - 1)  # seconds
-        total_seconds = exercise_time + rest_time
-        return round(total_seconds / 60, 1)
+    # def get_duration_minutes(self):
+    #     """Estimate total duration for this exercise in minutes"""
+    #     # Assume 3 seconds per rep, plus rest time between sets
+    #     exercise_time = self.reps * 3  # seconds
+    #     rest_time = self.rest_time_sec * (self.sets - 1)  # seconds
+    #     total_seconds = exercise_time + rest_time
+    #     return round(total_seconds / 60, 1)
     
     def mark_completed(self):
         """Mark this exercise as completed"""

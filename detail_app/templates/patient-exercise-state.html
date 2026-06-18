@@ -333,13 +333,14 @@
         <div class="header">
             <div class="patient-info">
                 <div class="patient-details">
-                    <h1>{{ patient.patient_full_name }}</h1>
-                    <p><strong>Patient Code:</strong> {{ patient.patient_code }}</p>
+                    <h1>{{ patient.patient_name }}</h1>
                     <p><strong>Diagnosis:</strong> {{ patient.diagnosis|default:"Not specified" }}</p>
                 </div>
 
-                <a href="{% url 'add-edit-exercise' patient_id=patient.id %}" class="btn btn-primary"> Reassign Exercise </a>
-                
+                <form method="post" action="{% url 'reassign-exercise' patient_id=patient.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Reassign Exercise</button>
+                </form>
                 {% comment %} <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number">{{ total_prescriptions }}</div>
@@ -365,9 +366,10 @@
                 
                 <div class="prescription-header" onclick="togglePrescription({{ forloop.counter0 }})">
                     <div class="prescription-title">
-                        <h3>Prescription #{{ prescription_data.prescription.id }}</h3>
-                        <p>Started: {{ prescription_data.prescription.start_date|date:"M d, Y" }} | 
-                           Ends: {{ prescription_data.prescription.end_date|date:"M d, Y" }}</p>
+                        <h3>
+                            Prescription #{{ forloop.revcounter }} – 
+                            {{ prescription_data.prescription.created_at|date:"F j" }}
+                        </h3>
                     </div>
                     <div class="prescription-status">
                         <span class="status-badge status-{{ prescription_data.prescription.status }}">

@@ -57,8 +57,7 @@ def patient_exercise_status(request, patient_id):
         
         # Check if prescription is active
         today = date.today()
-        is_active = (prescription.status == 'active' and 
-                    prescription.start_date <= today <= prescription.end_date)
+        is_active = (prescription.status == 'active')
         
         prescriptions_data.append({
             'prescription': prescription,
@@ -66,7 +65,7 @@ def patient_exercise_status(request, patient_id):
             'total_exercises': total_exercises,
             'completed_exercises': completed_exercises,
             'is_active': is_active,
-            'days_remaining': (prescription.end_date - today).days if is_active else 0
+            
         })
     
     context = {
