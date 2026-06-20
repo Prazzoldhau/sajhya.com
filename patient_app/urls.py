@@ -5,5 +5,6 @@ from . import views
 urlpatterns = [
     path ('patient-login/', views.patient_login, name = "patient-login"),
     path ('patient-dashboard/', views.patient_dashboard, name = "patient-dashboard"),
+    path ('api/login/', views.patient_api_login, name='patient_api_login'),# ✅ NEW: Mobile API endpoint (JSON)
     
 ]
