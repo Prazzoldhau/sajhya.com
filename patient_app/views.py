@@ -185,17 +185,37 @@ def patient_api_login(request):
         # --- Fetch latest prescription ---
         latest_prescription = Prescription.objects.filter(patient=patient).order_by('-created_at').first()
         prescription_data = None
+        # if latest_prescription:
+        #     exercises = latest_prescription.exercises.all().order_by('order')
+
+        #     # Safely get attributes with fallbacks
+        #     status = getattr(latest_prescription, 'status', 'active')
+        #     # Try common field names for notes
+        #     notes = getattr(latest_prescription, 'prescription_notes', None)
+        #     if notes is None:
+        #         notes = getattr(latest_prescription, 'notes', None)
+        #     if notes is None:
+        #         notes = getattr(latest_prescription, 'note', None)
+
+        #     prescription_data = {
+        #         'id': latest_prescription.id,
+        #         'created_at': latest_prescription.created_at.isoformat() if latest_prescription.created_at else '',
+        #         'status': status,
+        #         'prescription_notes': notes,
+        #         'exercises': [
+        #             {
+        #                 'exercise_name': getattr(ex, 'exercise_name', 'Unnamed'),
+        #                 'exercise_url': getattr(ex, 'exercise_url', None),
+        #             } for ex in exercises
+        #         ]
+        #     }
         if latest_prescription:
-            exercises = latest_prescription.exercises.all().order_by('order')
+            # Fetch through model instances (they have 'order' and reference the Exercise)
+            through_instances = latest_prescription.prescriptionexercise_set.all().order_by('order')
 
             # Safely get attributes with fallbacks
             status = getattr(latest_prescription, 'status', 'active')
-            # Try common field names for notes
-            notes = getattr(latest_prescription, 'prescription_notes', None)
-            if notes is None:
-                notes = getattr(latest_prescription, 'notes', None)
-            if notes is None:
-                notes = getattr(latest_prescription, 'note', None)
+            notes = getattr(latest_prescription, 'prescription_notes', None) or getattr(latest_prescription, 'notes', None)
 
             prescription_data = {
                 'id': latest_prescription.id,
@@ -204,9 +224,9 @@ def patient_api_login(request):
                 'prescription_notes': notes,
                 'exercises': [
                     {
-                        'exercise_name': getattr(ex, 'exercise_name', 'Unnamed'),
-                        'exercise_url': getattr(ex, 'exercise_url', None),
-                    } for ex in exercises
+                        'exercise_name': ti.exercise.exercise_name,
+                        'exercise_url': ti.exercise.exercise_url,  # this has the actual image URL
+                    } for ti in through_instances
                 ]
             }
 
