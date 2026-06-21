@@ -209,11 +209,29 @@ def patient_api_login(request):
         #             } for ex in exercises
         #         ]
         #     }
+        # if latest_prescription:
+            # # Fetch PrescriptionExercise instances via the related manager
+            # through_instances = latest_prescription.exercises.all().order_by('order')
+
+            # # Safely get attributes with fallbacks
+            # status = getattr(latest_prescription, 'status', 'active')
+            # notes = getattr(latest_prescription, 'prescription_notes', None) or getattr(latest_prescription, 'notes', None)
+
+            # prescription_data = {
+            #     'id': latest_prescription.id,
+            #     'created_at': latest_prescription.created_at.isoformat() if latest_prescription.created_at else '',
+            #     'status': status,
+            #     'prescription_notes': notes,
+            #     'exercises': [
+            #         {
+            #             'exercise_name': ti.exercise.exercise_name,
+            #             'exercise_url': ti.exercise.exercise_url,  # actual URL from ExerciseMain
+            #         } for ti in through_instances
+            #     ]
+            # }
         if latest_prescription:
-            # Fetch PrescriptionExercise instances via the related manager
             through_instances = latest_prescription.exercises.all().order_by('order')
 
-            # Safely get attributes with fallbacks
             status = getattr(latest_prescription, 'status', 'active')
             notes = getattr(latest_prescription, 'prescription_notes', None) or getattr(latest_prescription, 'notes', None)
 
@@ -225,7 +243,7 @@ def patient_api_login(request):
                 'exercises': [
                     {
                         'exercise_name': ti.exercise.exercise_name,
-                        'exercise_url': ti.exercise.exercise_url,  # actual URL from ExerciseMain
+                        'exercise_url': request.build_absolute_uri(ti.exercise.exercise_url) if ti.exercise.exercise_url else None,
                     } for ti in through_instances
                 ]
             }
