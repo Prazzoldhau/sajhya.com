@@ -165,7 +165,6 @@ def patient_dashboard(request):
 #             'success': False,
 #             'error': f'Server error: {str(e)}'
 #         }, status=500)
-
 @csrf_exempt
 @require_http_methods(["POST"])
 def patient_api_login(request):
@@ -177,43 +176,49 @@ def patient_api_login(request):
         if not patient_code or not pin_input:
             return JsonResponse({'success': False, 'error': 'Username and password are required'}, status=400)
 
-        try:
-            patient = AddPatient.objects.get(patient_code=patient_code)
-        except AddPatient.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Invalid credentials'}, status=401)
-
-        # Verify PIN
+        patient = AddPatient.objects.get(patient_code=patient_code)
         if patient.patient_contact != pin_input:
             return JsonResponse({'success': False, 'error': 'Invalid credentials'}, status=401)
 
-        # Set session
         request.session['patient_id'] = patient.id
 
-        # --- Fetch latest prescription (same as web dashboard) ---
+        # --- Fetch latest prescription ---
         latest_prescription = Prescription.objects.filter(patient=patient).order_by('-created_at').first()
         prescription_data = None
         if latest_prescription:
             exercises = latest_prescription.exercises.all().order_by('order')
+
+            # Safely get attributes with fallbacks
+            status = getattr(latest_prescription, 'status', 'active')
+            # Try common field names for notes
+            notes = getattr(latest_prescription, 'prescription_notes', None)
+            if notes is None:
+                notes = getattr(latest_prescription, 'notes', None)
+            if notes is None:
+                notes = getattr(latest_prescription, 'note', None)
+
             prescription_data = {
                 'id': latest_prescription.id,
                 'created_at': latest_prescription.created_at.isoformat() if latest_prescription.created_at else '',
-                'status': latest_prescription.status,
-                'prescription_notes': latest_prescription.notes,
+                'status': status,
+                'prescription_notes': notes,
                 'exercises': [
                     {
-                        'exercise_name': ex.exercise_name,
-                        'exercise_url': ex.exercise_url,   # adjust field name
+                        'exercise_name': getattr(ex, 'exercise_name', 'Unnamed'),
+                        'exercise_url': getattr(ex, 'exercise_url', None),
                     } for ex in exercises
                 ]
             }
 
-        # --- Build response (matching what the app expects) ---
+        # Build response
+        patient_name = getattr(patient, 'patient_name', 'Patient')
+        diagnosis = getattr(patient, 'diagnosis', 'Not specified')
         response_data = {
             'success': True,
             'patient_id': patient.id,
-            'patient_name': getattr(patient, 'patient_name', 'Patient'),
+            'patient_name': patient_name,
             'patient_code': patient.patient_code,
-            'diagnosis': getattr(patient, 'diagnosis', 'Not specified'),   # if exists
+            'diagnosis': diagnosis,
             'latest_prescription': prescription_data,
             'message': 'Login successful'
         }
@@ -222,7 +227,12 @@ def patient_api_login(request):
 
     except json.JSONDecodeError:
         return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except AddPatient.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Invalid credentials'}, status=401)
     except Exception as e:
         import traceback
-        # print(f"❌ API Login Error: {traceback.format_exc()}")
+        # Log to server logs (avoid print to stdout)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(traceback.format_exc())
         return JsonResponse({'success': False, 'error': f'Server error: {str(e)}'}, status=500)
