@@ -210,10 +210,11 @@ def patient_api_login(request):
         #         ]
         #     }
         if latest_prescription:
-            # Fetch through model instances (they have 'order' and reference the Exercise)
-            through_instances = latest_prescription.prescriptionexercise_set.all().order_by('order')
+            # Get the through model dynamically
+            through_model = latest_prescription.exercises.through
+            through_instances = through_model.objects.filter(prescription=latest_prescription).order_by('order')
 
-            # Safely get attributes with fallbacks
+            # Safely get attributes
             status = getattr(latest_prescription, 'status', 'active')
             notes = getattr(latest_prescription, 'prescription_notes', None) or getattr(latest_prescription, 'notes', None)
 
@@ -225,7 +226,7 @@ def patient_api_login(request):
                 'exercises': [
                     {
                         'exercise_name': ti.exercise.exercise_name,
-                        'exercise_url': ti.exercise.exercise_url,  # this has the actual image URL
+                        'exercise_url': ti.exercise.exercise_url,  # now uses the actual URL from the Exercise model
                     } for ti in through_instances
                 ]
             }
