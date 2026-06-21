@@ -65,7 +65,7 @@ def patient_dashboard(request):
     exercises = []
     if latest_prescription:
         exercises = latest_prescription.exercises.all().order_by('order')
-    print (exercises)
+    # print (exercises)
     context = {
         'patient': patient,
         'latest_prescription': latest_prescription,
@@ -224,5 +224,5 @@ def patient_api_login(request):
         return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
     except Exception as e:
         import traceback
-        print(f"❌ API Login Error: {traceback.format_exc()}")
+        # print(f"❌ API Login Error: {traceback.format_exc()}")
         return JsonResponse({'success': False, 'error': f'Server error: {str(e)}'}, status=500)
