@@ -9,6 +9,41 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import ensure_csrf_cookie
 
+def patient_api_me(request):
+    patient_id = request.session.get('patient_id')
+    if not patient_id:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    
+    try:
+        patient = AddPatient.objects.get(id=patient_id)
+        latest_prescription = Prescription.objects.filter(patient=patient).order_by('-created_at').first()
+        prescription_data = None
+        if latest_prescription:
+            through_instances = latest_prescription.exercises.all().order_by('order')
+            status = getattr(latest_prescription, 'status', 'active')
+            notes = getattr(latest_prescription, 'prescription_notes', None) or getattr(latest_prescription, 'notes', None)
+            prescription_data = {
+                'id': latest_prescription.id,
+                'created_at': latest_prescription.created_at.isoformat() if latest_prescription.created_at else '',
+                'status': status,
+                'prescription_notes': notes,
+                'exercises': [
+                    {
+                        'exercise_name': ti.exercise.exercise_name,
+                        'exercise_url': request.build_absolute_uri(ti.exercise.exercise_url) if ti.exercise.exercise_url else None,
+                    } for ti in through_instances
+                ]
+            }
+        return JsonResponse({
+            'success': True,
+            'patient_id': patient.id,
+            'patient_name': getattr(patient, 'patient_name', 'Patient'),
+            'patient_code': patient.patient_code,
+            'diagnosis': getattr(patient, 'diagnosis', 'Not specified'),
+            'latest_prescription': prescription_data,
+        })
+    except AddPatient.DoesNotExist:
+        return JsonResponse({'error': 'Patient not found'}, status=404)
 @ensure_csrf_cookie
 def csrf_token_view(request):
     return JsonResponse({'detail': 'CSRF cookie set'})
