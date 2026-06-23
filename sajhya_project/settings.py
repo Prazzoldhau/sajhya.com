@@ -59,6 +59,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsMiddleware',  # ✅ must be here
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -139,3 +140,24 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 200 * 1024 * 1024  # 200 MB
 
 # Optional: Restrict file uploads to APK only (enforced at view level too)
 ALLOWED_APK_MIME_TYPES = ['application/vnd.android.package-archive']
+
+
+
+# CORS - allow Flutter app requests
+CORS_ALLOWED_ORIGINS = [
+    "https://sajhya.com",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# Session cookie - required for mobile cross-origin cookie persistence
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
+SESSION_SAVE_EVERY_REQUEST = True
+
+# CSRF
+CSRF_TRUSTED_ORIGINS = [
+    "https://sajhya.com",
+]
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = True
