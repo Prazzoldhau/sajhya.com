@@ -337,10 +337,15 @@
                     <p><strong>Diagnosis:</strong> {{ patient.diagnosis|default:"Not specified" }}</p>
                 </div>
 
+                {% if prescriptions %}
                 <form method="post" action="{% url 'reassign-exercise' patient_id=patient.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-primary">Reassign Exercise</button>
                 </form>
+                {% else %}
+                    <button type="submit" disabled>Reassign Exercise</button>
+                {% endif %}
+               
                 {% comment %} <div class="stats">
                     <div class="stat-card">
                         <div class="stat-number">{{ total_prescriptions }}</div>
@@ -443,9 +448,6 @@
             <div class="empty-state">
                 <h3>📋 No Prescriptions Yet</h3>
                 <p>This patient doesn't have any exercise prescriptions.</p>
-                <button class="btn btn-primary" onclick="location.href='/exe/exercise-template/'">
-                    Create New Prescription
-                </button>
             </div>
         {% endif %}
     </div>

@@ -56,3 +56,35 @@ def upload_apk(request):
 def upload_page(request):
     # Only staff can see this page. If not staff, @staff_member_required redirects to login.
     return render(request, 'upload.html')
+
+# medic/views.py
+import os
+from django.conf import settings
+from django.shortcuts import render
+
+def app_download_page(request):
+    # Path to your APK file (inside MEDIA_ROOT/apps/)
+    file_path = os.path.join(settings.MEDIA_ROOT, 'apps', 'patient_app.apk')
+    file_exists = os.path.exists(file_path)
+    
+    # Optionally, read a version from a .txt file or hardcode it
+    version = "1.0.0"  # You could store this in a separate file or model
+
+    context = {
+        'file_exists': file_exists,
+        'version': version,
+    }
+    return render(request, 'download.html', context)
+
+
+
+# medic/views.py (add this)
+from django.http import FileResponse, Http404
+
+def download_latest_app(request):
+    file_path = os.path.join(settings.MEDIA_ROOT, 'apps', 'latest.apk')
+    if not os.path.exists(file_path):
+        raise Http404("App file not found.")
+    response = FileResponse(open(file_path, 'rb'), as_attachment=True)
+    response['Content-Disposition'] = 'attachment; filename="MyApp.apk"'
+    return response

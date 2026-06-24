@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Download App{% endblock %}
+
+{% block content %}    
+<div class="container">
+    <div class="app-download-section">
+        {% if file_exists %}
+            <h3>Latest App Version</h3>
+            <p>Version: {{ version }}</p>
+            <a href="{% url 'download_app' %}" class="btn btn-primary" style="margin-top: 15px;">
+                Download APK
+            </a>
+            <p class="text-muted" style="margin-top: 10px;">Click the button to download the latest version.</p>
+        {% else %}
+            <h3>App Not Available</h3>
+            <p>The APK file is currently not uploaded. Please check back later.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
