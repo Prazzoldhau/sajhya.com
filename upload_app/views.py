@@ -63,8 +63,8 @@ from django.conf import settings
 from django.shortcuts import render
 
 def app_download_page(request):
-    # Path to your APK file (inside MEDIA_ROOT/apps/)
-    file_path = os.path.join(settings.MEDIA_ROOT, 'apps', 'patient_app.apk')
+    # Path to your APK file (inside MEDIA_ROOT/apks/)
+    file_path = os.path.join(settings.MEDIA_ROOT, 'apks', 'patient_app.apk')
     file_exists = os.path.exists(file_path)
     
     # Optionally, read a version from a .txt file or hardcode it
@@ -82,7 +82,7 @@ def app_download_page(request):
 from django.http import FileResponse, Http404
 
 def download_latest_app(request):
-    file_path = os.path.join(settings.MEDIA_ROOT, 'apps', 'latest.apk')
+    file_path = os.path.join(settings.MEDIA_ROOT, 'apks', 'latest.apk')
     if not os.path.exists(file_path):
         raise Http404("App file not found.")
     response = FileResponse(open(file_path, 'rb'), as_attachment=True)
