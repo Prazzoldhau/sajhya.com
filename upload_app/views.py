@@ -82,7 +82,7 @@ def app_download_page(request):
 from django.http import FileResponse, Http404
 
 def download_latest_app(request):
-    file_path = os.path.join(settings.MEDIA_ROOT, 'apks', 'latest.apk')
+    file_path = os.path.join(settings.MEDIA_ROOT, 'apks', 'patient_app.apk')
     if not os.path.exists(file_path):
         raise Http404("App file not found.")
     response = FileResponse(open(file_path, 'rb'), as_attachment=True)
