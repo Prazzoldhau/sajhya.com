@@ -278,11 +278,17 @@ select:focus {
 }
 
 .card-content {
-    padding: 20px;
+    /* padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px; */
+    padding: 12px 16px 16px; /* top, left/right, bottom */
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 15px;
+    flex: 1; 
 }
 
 .exercise-name {
@@ -290,6 +296,32 @@ select:focus {
     font-weight: 600;
     color: #333;
     flex: 1;
+}
+
+/* Image container */
+.card-image {
+    width: 100%;
+    height: 150px;         /* fixed height, adjust as needed */
+    overflow: hidden;
+    background: #f0f0f0;    /* fallback background while loading */
+    flex-shrink: 0;         /* prevents image from shrinking */
+}
+
+.card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* ensures the image fills the container nicely */
+    display: block;
+}
+
+
+/* Optional: if you want the name to wrap and stay below image */
+.exercise-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    flex: 1;
+    word-break: break-word; /* handles long names */
 }
 
 /* Difficulty Badges */

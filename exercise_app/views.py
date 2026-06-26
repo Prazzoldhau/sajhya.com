@@ -38,7 +38,7 @@ def get_exercises_by_subregion(request):
         exercises_qs = ExerciseMain.objects.filter(sub_region_fk_id=sub_region_id)
         exercises = exercises_qs.values(
             'id', 'exercise_name', 'exercise_type', 'difficulty_level',
-            'default_sets', 'default_reps', 'hold_time_sec', 'exercise_description'
+            'default_sets', 'default_reps', 'hold_time_sec', 'exercise_description', 'exercise_url'
         )
         return JsonResponse({'exercises': list(exercises)})
     return JsonResponse({'exercises': []})

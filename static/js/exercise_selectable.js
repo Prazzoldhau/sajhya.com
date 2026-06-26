@@ -170,9 +170,42 @@ document.addEventListener('DOMContentLoaded', function() {
         highlightSelectedExercises();
     }
     
+    // function renderExerciseCard(exercise) {
+    //     return `
+    //         <div class="exercise-card" data-exercise-id="${exercise.id}" onclick="window.toggleExerciseSelection(${exercise.id})">
+    //             <div class="card-content">
+    //                 <div class="exercise-name">${escapeHtml(exercise.exercise_name || 'Unknown')}</div>
+    //                 <div class="difficulty-badge difficulty-${exercise.difficulty_level || 1}">
+    //                     ${getDifficultyText(exercise.difficulty_level || 1)}
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     `;
+    // }
     function renderExerciseCard(exercise) {
+        console.log('exercise_url raw value:', JSON.stringify(exercise.exercise_url));
+        let imageUrl;
+
+        // Check if exercise_url exists and is not empty
+        if (exercise.exercise_url && exercise.exercise_url.trim() !== '') {
+            // Prepend /static/ only if not already present
+            if (exercise.exercise_url.startsWith('/static/')) {
+                imageUrl = exercise.exercise_url; // already full
+            } else {
+                // Ensure no double slashes
+                const path = exercise.exercise_url.startsWith('/') ? exercise.exercise_url : '/' + exercise.exercise_url;
+                imageUrl = '/static' + path; // e.g., /static/exercises/kneepain/...
+            }
+        } else {
+            // Fallback placeholder (data URI, no external file)
+            imageUrl = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="280" height="200" viewBox="0 0 280 200"%3E%3Crect width="280" height="200" fill="%23eee"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="16" fill="%23999"%3ENo Image%3C/text%3E%3C/svg%3E';
+        }
+
         return `
             <div class="exercise-card" data-exercise-id="${exercise.id}" onclick="window.toggleExerciseSelection(${exercise.id})">
+                <div class="card-image">
+                    <img src="${escapeHtml(imageUrl)}" alt="${escapeHtml(exercise.exercise_name || 'Exercise')}" loading="lazy">
+                </div>
                 <div class="card-content">
                     <div class="exercise-name">${escapeHtml(exercise.exercise_name || 'Unknown')}</div>
                     <div class="difficulty-badge difficulty-${exercise.difficulty_level || 1}">
@@ -182,7 +215,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
     }
-    
     function loadMoreExercises(difficultyLevel) {
         const levelExercises = window.groupedExercises[difficultyLevel];
         const currentVisible = window.visibleCount[difficultyLevel];
