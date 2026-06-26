@@ -11,3 +11,12 @@ SetEnv SECRET_KEY django-insecure-wb$0m-h54(@rhy+en-3xtjjbo%avy154$p_&o@7w24x5w1
 SetEnv DEBUG on
 </IfModule>
 # DO NOT REMOVE OR MODIFY. CLOUDLINUX ENV VARS CONFIGURATION END
+# Allow API requests without bot verification
+<IfModule Litespeed>
+RewriteEngine On
+RewriteRule ^patient-app/api/ - [E=noabuse:1,L]
+</IfModule>
+<IfModule LiteSpeed>
+RewriteEngine On
+RewriteRule ^patient-app/api/ - [E=noabuse:1,L]
+</IfModule>
