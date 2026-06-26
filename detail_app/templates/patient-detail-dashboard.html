@@ -267,10 +267,9 @@
         <!-- Header -->
         <div class="header">
             <h1 class="patient-title">👨‍⚕️ {{ patient.patient_name }}</h1>
-            {% comment %} <p class="patient-code">ID: {{ patient.enrollment_id|default:"Not assigned" }}</p>
-            <p class="patient-code">📞 {{ patient.contact_number|default:"No contact" }} | 🚻 {{ patient.get_gender_display|default:"Not specified" }}</p>{% endcomment %}
-            {% if patient.diagnosis %} 
-            <p class="diagnosis"><strong>Diagnosis:</strong> {{ patient.diagnosis }}</p>
+            {% if patient.qr_code %}
+                <img src="{{ patient.qr_code }}" alt="QR Code for {{ patient.patient_name }}" 
+                    style="width: 150px; height: 150px; margin-top: 10px;">
             {% endif %}
         </div>
 
@@ -278,12 +277,8 @@
         <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="switchTab('sessions')">📅Session Status</button>
-            {% comment %} <button class="tab-btn" onclick="switchTab('modalities')">⚡ Modalities Summary</button>
-            <button class="tab-btn" onclick="switchTab('progress')">📈 Progress Tracking</button> {% endcomment %}
         </div>
 
-        <!-- Sessions Tab -->
-        {% comment %} <div id="sessions-tab" class="tab-content active"> {% endcomment %}
         <div class = "table-responsive">
             {% if sessions %}
             <table class="data-table">
@@ -311,68 +306,6 @@
             </div>
             {% endif %}
         </div>
-
-        {% comment %} <!-- Modalities Tab -->
-        <div id="modalities-tab" class="tab-content">
-            <h3>⚡ Most Used Modalities</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Modality</th>
-                        <th>Frequency Used</th>
-                        <th>Last Used</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for modality in modality_stats %}
-                    <tr>
-                        <td>{{ modality.name }}</td>
-                        <td>{{ modality.count }} times</td>
-                        <td>{{ modality.last_used|date:"Y-m-d"|default:"-" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="3" style="text-align: center;">No modalities recorded yet</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Progress Tab -->
-        <div id="progress-tab" class="tab-content">
-            <h3>📊 Pain Level Trend</h3>
-            <div style="padding: 20px; background: #f8f9fa; border-radius: 10px; text-align: center;">
-                <p>Progress chart will appear here</p>
-                <small>Sessions: {{ sessions|length }} recorded</small>
-            </div>
-            
-            <h3 style="margin-top: 25px;">🔄 Progress Summary</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Session Date</th>
-                        <th>Pain Level</th>
-                        <th>Progress</th>
-                        <th>Next Session</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for session in sessions|slice:":10" %}
-                    <tr>
-                        <td>{{ session.session_date|date:"Y-m-d" }}</td>
-                        <td>{{ session.pain_level|default:"-" }}/10</td>
-                        <td>{{ session.get_progress_status_display|default:"-" }}</td>
-                        <td>{{ session.next_session|date:"Y-m-d"|default:"-" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" style="text-align: center;">No progress data available</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div> {% endcomment %}
     </div>
 
     <script>
