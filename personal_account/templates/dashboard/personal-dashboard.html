@@ -1,172 +1,137 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Patients{% endblock %}
+{% block title %}My Patients · Sajhya{% endblock %}
 
 {% block content %}
-<div class="navbar">
-        <div class="logo">Sa:jhya </div>
-
-    
-  
-        <!-- Settings Dropdown -->
-        <div class="dropdown">
-            <button class="btn-gradient dropdown-toggle">⚙️ Settings</button>
-            <div class="dropdown-menu">
-                <a href="{% url 'create-patient'%}" class="dropdown-item">
-                    🏥 Add Patient
-                </a>
-                <a href="#" class="dropdown-item">
-                    📋 Manage Patient
-                </a>
-                <a href="#" class="dropdown-item">
-                    👤 Profile Settings
-                </a>
-                <div class="dropdown-divider"></div>
-                <form method="POST" action="{% url 'logout-personal'%}" class="logout-form-dropdown">
+<nav class="sj-nav">
+    <a href="{% url 'personal-dashboard' %}" class="sj-logo">Sa<span>:</span>jhya</a>
+    <div class="sj-nav-actions">
+        <a href="{% url 'my-clinics' %}" class="sj-pilllink"><i class="fas fa-hospital"></i> Clinics</a>
+        <div class="sj-dropdown" id="sjDropdown">
+            <button class="sj-btn sj-btn-primary" id="sjGear"><i class="fas fa-cog"></i> Settings <i class="fas fa-chevron-down" style="font-size:.7rem"></i></button>
+            <div class="sj-menu">
+                <a href="{% url 'create-patient' %}"><i class="fas fa-user-plus"></i> Add Patient</a>
+                <a href="#"><i class="fas fa-clipboard-list"></i> Manage Patients</a>
+                <a href="#"><i class="fas fa-user-cog"></i> Profile Settings</a>
+                <div class="sj-divider"></div>
+                <form method="POST" action="{% url 'logout-personal' %}">
                     {% csrf_token %}
-                    <button type="submit" class="dropdown-item logout-item">
-                        🚪 Logout
-                    </button>
+                    <button type="submit" class="sj-logout"><i class="fas fa-right-from-bracket"></i> Logout</button>
                 </form>
             </div>
         </div>
-</div>  <!-- ✅ Closing navbar properly -->
-<div class="container">
-        <!-- Header -->
-    <div class="header">   
-        <a href = "{% url 'my-clinics' %}" >
-            <h1>Clinics </h1>
-        </a>
     </div>
-    <br>
+</nav>
 
-
-
-    <!-- Search Box -->
-    <div class="search-container">
-        <span class="total-patients">📊 Total Patients: <span>{{ total_count }}</span></span>
-        🔍 Search by:
-        <select id="searchType">
-            <option value="name">Name</option>
-            <option value="code">Patient Code</option>
-            <option value="contact">Contact Number</option>
-        </select>
-        <input type="text" id="searchValue" placeholder="Enter value...">
-        <button onclick="searchPatients()">Search</button>
-        <button onclick="clearSearch()">Clear</button>
+<div class="sj-wrap">
+    <div class="sj-head">
+        <div>
+            <a href="{% url 'my-clinics' %}" class="sj-crumb"><i class="fas fa-arrow-left"></i> My Clinics</a>
+            <h1>My Patients</h1>
+            <p>Manage and track everyone under your personal care.</p>
+        </div>
+        <a href="{% url 'create-patient' %}" class="sj-btn sj-btn-primary"><i class="fas fa-plus"></i> Add Patient</a>
     </div>
 
-    {% comment %} <!-- Date Range Filter -->
-    <div class="search-container">
-        📅 Date Range:
-        <input type="date" id="fromDate">
-        to
-        <input type="date" id="toDate">
-        <button onclick="filterByDate()">Apply</button>
-    </div> {% endcomment %}
+    <div class="sj-card">
+        <div class="sj-card-head">
+            <div class="sj-card-title"><i class="fas fa-list-ul"></i> Patient Directory</div>
+            <span class="sj-badge" style="margin-left:10px;">{{ total_count }} total</span>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-left:auto;">
+                <select id="searchType" class="sj-field" style="width:auto;">
+                    <option value="name">Name</option>
+                    <option value="code">Patient Code</option>
+                    <option value="contact">Contact Number</option>
+                </select>
+                <input type="text" id="searchValue" class="sj-input" style="width:auto; min-width:200px;" placeholder="Search patients...">
+                <button onclick="searchPatients()" class="sj-btn sj-btn-primary"><i class="fas fa-search"></i> Search</button>
+                <button onclick="clearSearch()" class="sj-btn sj-btn-ghost">Clear</button>
+            </div>
+        </div>
 
-    <!-- Patients Table -->
-    {% if patients %}
-    <div class="table-responsive">
-        <table class="patient-table">
-            
+        {% if patients %}
+        <table class="sj-table">
             <thead>
                 <tr>
-                    {% comment %} <th>Patient Id</th> {% endcomment %}
-                    {% comment %} <th>Patient Code</th> {% endcomment %}
-                    <th>Full Name</th>
+                    <th>Patient</th>
                     <th>Diagnosis</th>
-                    {% comment %} <th>Contact</th> {% endcomment %}
-                    <th>Actions</th>
+                    <th>Sessions</th>
+                    <th style="text-align:right">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for patient in patients %}
                 <tr>
-                    {% comment %} <td>{{ patient.id }}</td> {% endcomment %}
-                    {% comment %} <td>{{ patient.patient_code }}</td> {% endcomment %}
-                    <td><strong>{{ patient.patient_name }}</strong></td>
-                    <td>{{ patient.patient_diagnosis|default:"-" }}</td>
-                    {% comment %} <td>{{ patient.patient_contact|default:"-" }}</td> {% endcomment %}
                     <td>
-                        <a href="{% url 'patient-detail' patient_id=patient.id %}" class="btn btn-info">Stat</a>
-                        <a href="{% url 'patient-exercise-status' patient_id=patient.id %}" class="btn btn-success">Track</a>
-                        <a href="{% url 'prescription-page' patient_id=patient.id %}" class="btn btn-info">Rx</a>
-                        <a href="{% url 'exercise-selectable' patient_id=patient.id %}" class="btn btn-success">Exe</a>
+                        <div class="sj-person">
+                            <div class="sj-avatar">{{ patient.patient_name|slice:":1"|upper }}</div>
+                            <div>
+                                <div class="sj-nm">{{ patient.patient_name }}</div>
+                                <div class="sj-sub">{{ patient.patient_code }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>{{ patient.patient_diagnosis|default:"—" }}</td>
+                    <td><span class="sj-badge"><i class="fas fa-check"></i> {{ patient.completed_session }} done</span></td>
+                    <td>
+                        <div class="sj-actions" style="justify-content:flex-end;">
+                            <a href="{% url 'patient-detail' patient_id=patient.id %}" class="sj-act stat"><i class="fas fa-chart-line"></i> Stat</a>
+                            <a href="{% url 'patient-exercise-status' patient_id=patient.id %}" class="sj-act track"><i class="fas fa-location-crosshairs"></i> Track</a>
+                            <a href="{% url 'prescription-page' patient_id=patient.id %}" class="sj-act rx"><i class="fas fa-prescription"></i> Rx</a>
+                            <a href="{% url 'exercise-selectable' patient_id=patient.id %}" class="sj-act exe"><i class="fas fa-dumbbell"></i> Exe</a>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        {% else %}
+        <div class="sj-empty">
+            <div class="sj-ic"><i class="fas fa-user-group"></i></div>
+            <h3>No Patients Found</h3>
+            <p>You haven't added any patients yet. Start by creating your first one.</p>
+            <a href="{% url 'create-patient' %}" class="sj-btn sj-btn-primary"><i class="fas fa-plus"></i> Add New Patient</a>
+        </div>
+        {% endif %}
     </div>
-    {% else %}
-    <div class="empty-state">
-        <h3>No Patients Found</h3>
-        <p>You haven't created any patients yet.</p>
-        <a href="#" class="btn btn-primary" style="margin-top: 15px;">+ Add New Patient</a>
-    </div>
-    {% endif %}
-</div>  <!-- ✅ Closing container -->
+</div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const dropdown = document.querySelector('.dropdown');
-    const dropdownToggle = document.querySelector('.dropdown-toggle');
-    
-    if (dropdown && dropdownToggle) {
-        // Toggle dropdown on button click
-        dropdownToggle.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
+document.addEventListener('DOMContentLoaded', function () {
+    const dropdown = document.getElementById('sjDropdown');
+    const gear = document.getElementById('sjGear');
+    if (dropdown && gear) {
+        gear.addEventListener('click', function (e) {
+            e.preventDefault(); e.stopPropagation();
             dropdown.classList.toggle('open');
         });
-        
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!dropdown.contains(e.target)) {
-                dropdown.classList.remove('open');
-            }
-        });
-        
-        // Close dropdown when an item is clicked
-        const dropdownItems = document.querySelectorAll('.dropdown-item');
-        dropdownItems.forEach(item => {
-            item.addEventListener('click', function() {
-                dropdown.classList.remove('open');
-            });
+        document.addEventListener('click', function (e) {
+            if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
         });
     }
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('search_type')) document.getElementById('searchType').value = params.get('search_type');
+    if (params.get('search_value')) document.getElementById('searchValue').value = params.get('search_value');
+    updatePlaceholder();
+    document.getElementById('searchValue').addEventListener('keydown', function (e) { if (e.key === 'Enter') searchPatients(); });
+    document.getElementById('searchType').addEventListener('change', updatePlaceholder);
 });
+
+function updatePlaceholder() {
+    const input = document.getElementById('searchValue');
+    switch (document.getElementById('searchType').value) {
+        case 'name': input.placeholder = 'Search by full name...'; break;
+        case 'code': input.placeholder = 'Search by patient code...'; break;
+        case 'contact': input.placeholder = 'Search by 10-digit number...'; break;
+    }
+}
 function searchPatients() {
-    let searchType = document.getElementById('searchType').value;
-    let searchValue = document.getElementById('searchValue').value;
-    //let fromDate = document.getElementById('fromDate').value;
-    //let toDate = document.getElementById('toDate').value;
-    //let url = `?search_type=${searchType}&search_value=${searchValue}&from_date=${fromDate}&to_date=${toDate}`;
-    let url = `?search_type=${searchType}&search_value=${searchValue}`;
-    window.location.href = url;
+    const searchType = document.getElementById('searchType').value;
+    const searchValue = document.getElementById('searchValue').value;
+    window.location.href = `?search_type=${encodeURIComponent(searchType)}&search_value=${encodeURIComponent(searchValue)}`;
 }
-
-function clearSearch() {
-    document.getElementById('searchValue').value = '';
-    window.location.href = window.location.pathname;
-}
-
-function filterByDate() {
-    let fromDate = document.getElementById('fromDate').value;
-    let toDate = document.getElementById('toDate').value;
-    let url = `?from_date=${fromDate}&to_date=${toDate}`;
-    window.location.href = url;
-}
-
-document.getElementById('searchType').addEventListener('change', function() {
-    let input = document.getElementById('searchValue');
-    switch(this.value) {
-        case 'name': input.placeholder = 'Enter full name...'; break;
-        case 'code': input.placeholder = 'Enter patient code...'; break;
-        case 'contact': input.placeholder = 'Enter 10-digit number...'; break;
-    }
-});
+function clearSearch() { window.location.href = window.location.pathname; }
 </script>
 {% endblock %}

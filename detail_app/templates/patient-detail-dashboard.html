@@ -1,310 +1,118 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ patient.patient_full_name }} - Patient Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/sajhya-ui.css' %}">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* Page-specific tweaks layered on top of the shared design system */
+        .pd-qr {
+            width: 150px; height: 150px; border-radius: 14px;
+            border: 1px solid var(--sj-line); background: #fff; padding: 8px;
+        }
+        .pd-header-grid {
+            display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+            justify-content: space-between;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Header */
-        .header {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .patient-title {
-            font-size: 2rem;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .patient-code {
-            color: #667eea;
-            font-size: 1rem;
-            margin-bottom: 5px;
-        }
-
-        .diagnosis {
-            color: #666;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #667eea;
-        }
-
-        .stat-label {
-            color: #666;
-            margin-top: 8px;
-            font-size: 0.9rem;
-        }
-
-        /* Action Buttons */
-        .action-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-
-        .btn-info:hover {
-            background: #138496;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #5a6268;
-        }
-
-        /* Tabs */
+        /* Tabs — keep the JS hook classes (.tabs / .tab-btn / .tab-content / .active) */
         .tabs {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 20px;
-            background: white;
-            border-radius: 10px;
-            padding: 5px;
+            display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap;
+            background: rgba(255,255,255,.85); border: 1px solid var(--sj-line);
+            border-radius: var(--sj-radius-sm); padding: 6px;
+            box-shadow: var(--sj-shadow-sm);
         }
-
         .tab-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            flex: 1; min-width: 140px; padding: 11px 14px; border: none; background: transparent;
+            cursor: pointer; font-family: inherit; font-size: .92rem; font-weight: 600;
+            color: var(--sj-muted); border-radius: 9px; transition: .2s;
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
         }
-
+        .tab-btn:hover { color: var(--sj-primary); }
         .tab-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--sj-primary);
+            color: #fff;
         }
-
-        .tab-content {
-            display: none;
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-top: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: pdFadeIn .3s ease; }
+        @keyframes pdFadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Tables */
-        .data-table {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #f0f0f0;
-            
-        }
-
-        .data-table th {
-            background: #667eea;
-            color: white;
-        }
-
-        .data-table tr:hover {
-            background: #f8f9fa;
-        }
-
-        /* Modalities List */
-        .modalities-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-        }
-
-        .modality-badge {
-            background: #667eea;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-        }
-
-        /* Alert */
-        .alert {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #28a745;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px;
-            color: #999;
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .btn {
-                text-align: center;
-            }
-        }
+        .pd-table-wrap { overflow-x: auto; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1 class="patient-title">👨‍⚕️ {{ patient.patient_name }}</h1>
-            {% if patient.qr_code %}
-                <img src="{{ patient.qr_code }}" alt="QR Code for {{ patient.patient_name }}" 
-                    style="width: 150px; height: 150px; margin-top: 10px;">
-            {% endif %}
+    <!-- Top nav -->
+    <nav class="sj-nav">
+        <a href="#" class="sj-logo">Sa<span>:</span>jhya</a>
+        <div class="sj-nav-actions">
+            <span class="sj-badge sj-badge-primary"><i class="fa-solid fa-user-injured"></i> Patient Detail</span>
         </div>
+    </nav>
 
+    <div class="sj-wrap">
+        <!-- Header card -->
+        <div class="sj-card sj-card-pad" style="margin-bottom: 22px;">
+            <div class="pd-header-grid">
+                <div class="sj-person">
+                    <div class="sj-avatar sj-avatar-lg"><i class="fa-solid fa-user-injured"></i></div>
+                    <div>
+                        <h1 style="font-size: 1.6rem; font-weight: 700; letter-spacing: -.5px; margin: 0;">{{ patient.patient_name }}</h1>
+                        <p style="color: var(--sj-muted); font-size: .9rem; margin-top: 4px;">Patient overview &amp; treatment sessions</p>
+                    </div>
+                </div>
+                {% if patient.qr_code %}
+                    <img src="{{ patient.qr_code }}" alt="QR Code for {{ patient.patient_name }}" class="pd-qr">
+                {% endif %}
+            </div>
+        </div>
 
         <!-- Tabs -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('sessions')">📅Session Status</button>
+            <button class="tab-btn active" onclick="switchTab('sessions')"><i class="fa-regular fa-calendar-check"></i> Session Status</button>
         </div>
 
-        <div class = "table-responsive">
-            {% if sessions %}
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Sessions</th>
-                        <th>Rx Response</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for session in sessions %}
-                    <tr>
-                        <td>{{ session.session_date|date:"Y-m-d H:i" }}</td>
-                        <td>{{ session.session_number }}</td>
-                        <td>{{ session.treatment_response }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            {% else %}
-            <div class="empty-state">
-                <h3>📭 No Sessions Yet</h3>
-                <p>Click "Add New Session" to record the first treatment session.</p>
+        <!-- Sessions table -->
+        <div class="sj-card">
+            <div class="sj-card-head">
+                <h2 class="sj-card-title"><i class="fa-solid fa-notes-medical" style="color: var(--sj-primary);"></i> Treatment Sessions</h2>
             </div>
-            {% endif %}
+            <div class="pd-table-wrap">
+                {% if sessions %}
+                <table class="sj-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Sessions</th>
+                            <th>Rx Response</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for session in sessions %}
+                        <tr>
+                            <td>{{ session.session_date|date:"Y-m-d H:i" }}</td>
+                            <td><span class="sj-badge sj-badge-primary">{{ session.session_number }}</span></td>
+                            <td>{{ session.treatment_response }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="sj-empty">
+                    <div class="sj-ic"><i class="fa-regular fa-folder-open"></i></div>
+                    <h3>No Sessions Yet</h3>
+                    <p>Click "Add New Session" to record the first treatment session.</p>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
@@ -314,15 +122,15 @@
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');
             });
-            
+
             // Remove active class from all buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             // Show selected tab
             document.getElementById(`${tabName}-tab`).classList.add('active');
-            
+
             // Add active class to clicked button
             event.target.classList.add('active');
         }

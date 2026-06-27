@@ -39,7 +39,7 @@ def patient_api_me(request):
             'patient_id': patient.id,
             'patient_name': getattr(patient, 'patient_name', 'Patient'),
             'patient_code': patient.patient_code,
-            'diagnosis': getattr(patient, 'diagnosis', 'Not specified'),
+            'diagnosis': getattr(patient, 'patient_diagnosis', None) or 'Not specified',
             'latest_prescription': prescription_data,
         })
     except AddPatient.DoesNotExist:
@@ -47,6 +47,19 @@ def patient_api_me(request):
 @ensure_csrf_cookie
 def csrf_token_view(request):
     return JsonResponse({'detail': 'CSRF cookie set'})
+
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def patient_api_logout(request):
+    """Log the patient out by clearing the session.
+
+    Called by the Flutter app's ApiService.logout(). Always returns success so
+    the client can safely clear its local cookies regardless of prior state.
+    """
+    request.session.pop('patient_id', None)
+    request.session.flush()
+    return JsonResponse({'success': True, 'message': 'Logged out'})
 
 def patient_login(request):
     # If the browser sends a POST request (user clicked the button)
@@ -116,6 +129,83 @@ def patient_dashboard(request):
 
 
 
+# ==================== SHARED SERIALIZER ====================
+
+def _build_patient_response(request, patient, message=None):
+    """Build the standard patient + latest-prescription JSON payload.
+
+    Mirrors the shape returned by patient_api_login / patient_api_me so all
+    login paths (code+PIN, QR) return identical data to the client.
+    """
+    latest_prescription = Prescription.objects.filter(patient=patient).order_by('-created_at').first()
+    prescription_data = None
+    if latest_prescription:
+        through_instances = latest_prescription.exercises.all().order_by('order')
+        status = getattr(latest_prescription, 'status', 'active')
+        notes = getattr(latest_prescription, 'prescription_notes', None) or getattr(latest_prescription, 'notes', None)
+        prescription_data = {
+            'id': latest_prescription.id,
+            'created_at': latest_prescription.created_at.isoformat() if latest_prescription.created_at else '',
+            'status': status,
+            'prescription_notes': notes,
+            'exercises': [
+                {
+                    'exercise_name': ti.exercise.exercise_name,
+                    'exercise_url': request.build_absolute_uri(ti.exercise.exercise_url) if ti.exercise.exercise_url else None,
+                } for ti in through_instances
+            ]
+        }
+
+    data = {
+        'success': True,
+        'patient_id': patient.id,
+        'patient_name': getattr(patient, 'patient_name', 'Patient'),
+        'patient_code': patient.patient_code,
+        'diagnosis': getattr(patient, 'patient_diagnosis', None) or 'Not specified',
+        'latest_prescription': prescription_data,
+    }
+    if message:
+        data['message'] = message
+    return data
+
+
+# ==================== MOBILE API: QR LOGIN ====================
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def patient_api_qr_login(request):
+    """Log a patient in from a scanned QR code.
+
+    The patient QR encodes the patient's `qr_token` (a random token). The
+    Flutter app scans it and POSTs {"qr_token": "<token>"}. On match we set the
+    same session the code+PIN flow uses and return the same payload.
+    """
+    try:
+        data = json.loads(request.body)
+        # Accept either key; tolerate a QR that embedded the token in a URL.
+        qr_token = (data.get('qr_token') or data.get('token') or '').strip()
+        if qr_token and '/' in qr_token:
+            qr_token = qr_token.rstrip('/').split('/')[-1]
+
+        if not qr_token:
+            return JsonResponse({'success': False, 'error': 'QR token is required'}, status=400)
+
+        try:
+            patient = AddPatient.objects.get(qr_token=qr_token)
+        except AddPatient.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Invalid or expired QR code'}, status=401)
+
+        request.session['patient_id'] = patient.id
+        return JsonResponse(_build_patient_response(request, patient, message='Login successful'))
+
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        import traceback, logging
+        logging.getLogger(__name__).error(traceback.format_exc())
+        return JsonResponse({'success': False, 'error': f'Server error: {str(e)}'}, status=500)
+
+
 # ==================== MOBILE API LOGIN ====================
 
 @csrf_exempt
@@ -159,7 +249,7 @@ def patient_api_login(request):
 
         # Build response
         patient_name = getattr(patient, 'patient_name', 'Patient')
-        diagnosis = getattr(patient, 'diagnosis', 'Not specified')
+        diagnosis = getattr(patient, 'patient_diagnosis', None) or 'Not specified'
         response_data = {
             'success': True,
             'patient_id': patient.id,

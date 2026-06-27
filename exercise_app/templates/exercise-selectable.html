@@ -6,10 +6,155 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exercise Library by Sub-Region</title>
-   <link rel="stylesheet" href="{% static 'css/exercise_selectable.css' %}"> 
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/exercise_selectable.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sajhya-ui.css' %}">
+    <style>
+        /* ===== Restyle to match Sajhya design system =====
+           sajhya-ui.css loads last so its body theme + tokens win.
+           Overrides below re-skin the legacy markup (and JS-generated
+           cards) to the shared look without changing any JS hooks. */
+
+        /* Neutralize the legacy full-page gradient/padding so the
+           sajhya-ui soft background shows through. */
+        body { padding: 0 !important; }
+
+        .container { max-width: 1180px; margin: 0 auto; padding: 26px 22px 60px; }
+
+        /* ---- Top navbar (legacy .navbar restyled like .sj-nav) ---- */
+        .navbar {
+            background: rgba(255, 255, 255, .85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, .6);
+            border-radius: var(--sj-radius, 18px);
+            box-shadow: var(--sj-shadow, 0 10px 30px -12px rgba(40, 44, 96, .25));
+            padding: 16px 22px;
+            margin: 0 0 22px;
+            gap: 18px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .navbar:hover { background: rgba(255, 255, 255, .92); }
+
+        .empty-state-header h3 {
+            font-size: 1.35rem; font-weight: 700; margin: 0; letter-spacing: -.4px;
+            -webkit-text-fill-color: transparent;
+        }
+        .empty-state-header p { margin: 4px 0 0; color: var(--sj-muted, #7b81a3); font-weight: 500; font-size: .9rem; }
+
+        .navbar .form-group { margin-bottom: 0; min-width: 240px; }
+
+        /* Sub-region select -> sajhya field look */
+        #subRegionSelect {
+            border: 1px solid var(--sj-line, #e7e9f5); background: #f8f9fe;
+            border-radius: 11px; padding: 11px 14px; font-size: .92rem;
+            font-family: inherit; color: var(--sj-ink, #1f2440);
+            cursor: pointer; transition: .15s; width: 100%;
+        }
+        #subRegionSelect:focus {
+            outline: none; border-color: var(--sj-accent, #4b6584);
+            box-shadow: 0 0 0 3px rgba(75, 101, 132, .12); background: #fff;
+        }
+
+        /* ---- Stats bar ---- */
+        .stats {
+            background: var(--sj-card, #fff); border: 1px solid var(--sj-line, #e7e9f5);
+            border-radius: var(--sj-radius, 18px); box-shadow: var(--sj-shadow-sm, 0 4px 14px -6px rgba(40, 44, 96, .18));
+            padding: 14px 20px; margin-bottom: 22px; color: var(--sj-ink, #1f2440);
+        }
+        .stats .exercise-count {
+            display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; font-weight: 700;
+            padding: 4px 10px; border-radius: 999px;
+            background: var(--sj-soft, #f7f8fa); color: var(--sj-accent, #4b6584); border: 1px solid var(--sj-line, #e5e7eb);
+        }
+
+        /* ---- Loader spinner tint ---- */
+        .loader p { color: var(--sj-muted, #7b81a3) !important; }
+        .spinner { border-top-color: var(--sj-primary, #5b5ff1); }
+
+        /* ---- Empty / error states as cards ---- */
+        .empty-state, .error-state {
+            background: var(--sj-card, #fff); border: 1px solid var(--sj-line, #e7e9f5);
+            border-radius: var(--sj-radius, 18px); box-shadow: var(--sj-shadow-sm, 0 4px 14px -6px rgba(40, 44, 96, .18));
+            color: var(--sj-muted, #7b81a3);
+        }
+        .empty-state h3, .error-state h3 { color: var(--sj-ink, #1f2440); }
+        .error-state { background: rgba(239, 68, 68, .06); border-color: rgba(239, 68, 68, .25); color: var(--sj-danger, #ef4444); }
+
+        /* ---- Difficulty sections (JS-generated) ---- */
+        .difficulty-section {
+            border: 1px solid var(--sj-line, #e7e9f5);
+            border-radius: var(--sj-radius, 18px);
+            box-shadow: var(--sj-shadow-sm, 0 4px 14px -6px rgba(40, 44, 96, .18));
+        }
+        .exercises-grid, .view-more-container { background: #f8f9fe; }
+        .difficulty-title h2 { font-weight: 600; }
+
+        /* ---- Exercise cards (JS-generated) ---- */
+        .exercise-card {
+            border-radius: var(--sj-radius-sm, 12px);
+            border: 2px solid var(--sj-line, #e7e9f5);
+            box-shadow: var(--sj-shadow-sm, 0 4px 14px -6px rgba(40, 44, 96, .18));
+        }
+        .exercise-card:hover { box-shadow: var(--sj-shadow, 0 10px 30px -12px rgba(40, 44, 96, .25)); }
+        .exercise-card.selected {
+            border-color: var(--sj-accent, #10b6a8);
+            background: rgba(16, 182, 168, .06);
+            box-shadow: 0 4px 12px rgba(16, 182, 168, .25);
+        }
+        .exercise-card.selected::before { background: var(--sj-accent, #10b6a8); }
+        .card-image img { max-width: 100%; }
+        .exercise-name { color: var(--sj-ink, #1f2440); }
+
+        /* ---- View more / less buttons ---- */
+        .view-more-btn {
+            background: linear-gradient(135deg, var(--sj-primary, #5b5ff1), var(--sj-primary-2, #8b5cf6));
+            color: #fff; box-shadow: 0 8px 16px -8px rgba(91, 95, 241, .9);
+        }
+        .view-more-btn:hover { background: linear-gradient(135deg, var(--sj-primary, #5b5ff1), var(--sj-primary-2, #8b5cf6)); filter: brightness(1.04); }
+        .view-less-btn { background: #f1f2fb; color: var(--sj-muted, #7b81a3); }
+        .view-less-btn:hover { background: #e7e9f7; color: var(--sj-ink, #1f2440); }
+
+        /* ---- Selection summary card ---- */
+        .selection-summary {
+            background: var(--sj-card, #fff); border: 1px solid var(--sj-line, #e7e9f5);
+            border-radius: var(--sj-radius, 18px); box-shadow: var(--sj-shadow, 0 10px 30px -12px rgba(40, 44, 96, .25));
+            padding: 22px;
+        }
+        .selection-summary h4 { color: var(--sj-ink, #1f2440); font-weight: 600; }
+
+        .selected-badge {
+            background: var(--sj-soft, #f7f8fa); color: var(--sj-accent, #4b6584); border: 1px solid var(--sj-line, #e5e7eb);
+            font-weight: 600; border-radius: 999px;
+        }
+        .remove-exercise:hover { color: var(--sj-danger, #ef4444); }
+
+        /* ---- Action buttons re-skinned to flat sajhya theme ---- */
+        .action-buttons .btn { border-radius: var(--sj-radius-sm, 9px); }
+        .action-buttons .btn-primary {
+            background: var(--sj-primary, #3a4a63); color: #fff;
+        }
+        .action-buttons .btn-primary:hover { background: var(--sj-primary-h, #2c394e); }
+        .action-buttons .btn-secondary { background: var(--sj-soft, #f7f8fa); color: var(--sj-ink, #1f2937); border: 1px solid var(--sj-line, #e5e7eb); }
+        .action-buttons .btn-secondary:hover { background: #eef0f3; }
+
+        @media (max-width: 820px) {
+            .navbar { padding: 14px; }
+            .navbar .form-group { width: 100%; }
+        }
+    </style>
 </head>
 <body>
-    
+
+    <!-- Top nav (sajhya design system) -->
+    <nav class="sj-nav">
+        <a href="#" class="sj-logo">Sa<span>:</span>jhya</a>
+        <div class="sj-nav-actions">
+            <span class="sj-badge sj-badge-primary"><i class="fa-solid fa-dumbbell"></i> Exercise Library</span>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="navbar">
             <div class="empty-state-header">
@@ -18,7 +163,7 @@
             </div>
 
             <div class="form-group">
-                
+
                 <select id="subRegionSelect">
                     <option value="">Exercises</option>
                     {% for sub_region in sub_regions %}
@@ -28,18 +173,18 @@
                     {% endfor %}
                 </select>
             </div>
-            
+
         </div>
 
         <div class="loader" id="loader">
             <div class="spinner"></div>
-            <p style="margin-top: 15px; color: white;">Loading exercises...</p>
+            <p style="margin-top: 15px;">Loading exercises...</p>
         </div>
 
         <div class="stats" id="stats">
             <span class="exercise-count" id="exerciseCount"></span>
             <span>exercises available</span>
-            <span id="selectedCount" style="color: #4caf50; margin-left: auto;"></span>
+            <span id="selectedCount" style="color: var(--sj-accent, #4b6584); margin-left: auto; font-weight: 600;"></span>
         </div>
 
         <div id="exercisesContainer">
@@ -53,14 +198,14 @@
             <h4>Selected Exercises (<span id="selectedExercisesCount">0</span>)</h4>
             <div class="selected-exercises-list" id="selectedExercisesList"></div>
             <div class="action-buttons">
-                <button class="btn btn-secondary" onclick="clearAllSelections()">Clear All</button>
-                <button class="btn btn-primary" onclick="submitPrescription()">Prescribe Selected Exercises</button>
+                <button class="btn btn-secondary" onclick="clearAllSelections()"><i class="fa-solid fa-trash-can"></i> Clear All</button>
+                <button class="btn btn-primary" onclick="submitPrescription()"><i class="fa-solid fa-circle-check"></i> Prescribe Selected Exercises</button>
             </div>
         </div>
     </div>
 
-   
-   
+
+
 
     <script>
         window.patientCode = '{{ patient_code }}';

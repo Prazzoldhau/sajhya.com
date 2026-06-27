@@ -1,159 +1,186 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Physiotherapy Treatment Record</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/sajhya-ui.css' %}">
     <style>
-        /* Your existing CSS (unchanged) */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .header { text-align: center; color: white; margin-bottom: 40px; }
-        .header h1 { font-size: 2rem; margin-bottom: 10px; }
-        .selection-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: 600; margin-bottom: 8px; color: #333; font-size: 0.9rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px 12px;
-            font-size: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-        }
-        .grid-2col {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .btn-success { background: #28a745; color: white; }
-        .btn-secondary { background: #6c757d; color: white; }
+        * { box-sizing: border-box; }
+
+        /* Section spacing for stacked cards */
+        .rx-section { margin-bottom: 22px; }
+
+        /* Modalities grid */
         .modalities-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 18px;
         }
         .modality-card {
-            background: white;
-            border-radius: 15px;
+            background: var(--sj-card);
+            border: 1px solid var(--sj-line);
+            border-radius: var(--sj-radius-sm);
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: var(--sj-shadow-sm);
             cursor: pointer;
-            border: 3px solid transparent;
-            transition: 0.2s;
+            border: 2px solid transparent;
+            transition: .2s;
             position: relative;
         }
+        .modality-card:hover { transform: translateY(-2px); }
         .modality-card.selected {
-            border-color: #28a745;
-            background: #f0fff4;
+            border-color: var(--sj-accent);
+            box-shadow: 0 1px 2px rgba(16, 24, 40, .06);
         }
         .modality-card.selected::before {
-            content: "✓";
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
             position: absolute;
             top: 10px;
             right: 10px;
-            background: #28a745;
-            color: white;
-            width: 28px;
-            height: 28px;
+            background: var(--sj-accent);
+            color: #fff;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 13px;
+            z-index: 2;
         }
         .modality-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
+            background: var(--sj-primary);
+            color: #fff;
+            padding: 18px 15px;
             text-align: center;
         }
-        .modality-name { font-size: 1rem; font-weight: bold; }
+        .modality-name { font-size: 1rem; font-weight: 600; }
+
+        /* Stats bar */
         .stats {
-            background: white;
-            border-radius: 10px;
-            padding: 12px 20px;
-            margin-bottom: 20px;
+            background: #f8f9fe;
+            border: 1px solid var(--sj-line);
+            border-radius: var(--sj-radius-sm);
+            padding: 12px 18px;
+            margin-top: 16px;
             display: none;
-            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            color: var(--sj-muted);
+            font-size: .9rem;
         }
         .stats.show { display: flex; }
+        .stats .modality-count {
+            font-weight: 700;
+            color: var(--sj-primary);
+            font-size: 1.1rem;
+        }
+        .stats #selectedCount { margin-left: auto; font-weight: 600; color: var(--sj-ink); }
+
+        /* Selected modality badges */
         .selected-modalities-list {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin: 15px 0;
+            margin: 16px 0;
         }
         .selected-modality-badge {
-            background: #28a745;
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
+            background: var(--sj-soft);
+            color: var(--sj-accent);
+            border: 1px solid var(--sj-line);
+            padding: 7px 14px;
+            border-radius: 999px;
             display: inline-flex;
-            gap: 8px;
+            gap: 9px;
             align-items: center;
+            font-weight: 600;
+            font-size: .85rem;
         }
-        .edit-modality, .remove-modality { cursor: pointer; background: rgba(0,0,0,0.2); padding: 0 4px; border-radius: 12px; }
+        .edit-modality, .remove-modality {
+            cursor: pointer;
+            background: rgba(12, 140, 129, .18);
+            width: 20px; height: 20px;
+            display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 50%;
+            font-size: .72rem;
+            transition: .15s;
+        }
+        .edit-modality:hover, .remove-modality:hover { background: rgba(12, 140, 129, .35); }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(31, 36, 64, .5);
+            backdrop-filter: blur(3px);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
         .modal-content {
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
+            background: var(--sj-card);
+            padding: 26px;
+            border-radius: var(--sj-radius);
             width: 90%;
             max-width: 500px;
+            box-shadow: var(--sj-shadow);
         }
+        .modal-content h3 { margin: 0 0 18px; font-weight: 600; font-size: 1.1rem; }
         .modal-param-group { margin-bottom: 15px; }
-        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .action-buttons { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
+        .modal-param-group label {
+            display: block; font-weight: 600; font-size: .85rem;
+            margin-bottom: 7px; color: var(--sj-ink);
+        }
+        .modal-param-group input {
+            border: 1px solid var(--sj-line); background: #f8f9fe; border-radius: 11px;
+            padding: 11px 14px; font-size: .92rem; font-family: inherit; color: var(--sj-ink);
+            outline: none; transition: .15s; width: 100%;
+        }
+        .modal-param-group input:focus {
+            border-color: var(--sj-accent); box-shadow: 0 0 0 3px rgba(75, 101, 132, .12); background: #fff;
+        }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+        .action-buttons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; margin-top: 18px; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<!-- Top nav -->
+<nav class="sj-nav">
+    <a href="#" class="sj-logo">Sa<span>:</span>jhya</a>
+    <div class="sj-nav-actions">
+        <span class="sj-badge sj-badge-primary"><i class="fa-solid fa-notes-medical"></i> Prescription</span>
+    </div>
+</nav>
+
+<div class="sj-wrap">
 
     <input type="hidden" id="patientId" value="{{ patient.id }}">
-    
-    <div class="header">
-        <h1>Physiotherapy Treatment Record</h1>
-        <p>{{ patient.patient_name }} | {{ patient.id }}</p>
-        <p>{{ patient.patient_diagnosis }}</p>
+
+    <!-- Page header -->
+    <div class="sj-head">
+        <div>
+            <h1>Physiotherapy Treatment Record</h1>
+            <p>{{ patient.patient_name }} | {{ patient.id }}</p>
+            <p>{{ patient.patient_diagnosis }}</p>
+        </div>
     </div>
 
     <!-- Session Info -->
-    <div class="selection-card">
-        <div class="grid-2col">
-            <div class="form-group">
-                <label>🔢 Session Number (auto)</label>
-                <input type="number" id="sessionNumber" name="session_number" value="{{ new_session }}" readonly style="background:#f0f0f0;">
+    <div class="sj-card sj-card-pad rx-section">
+        <div class="sj-grid sj-grid-auto">
+            <div class="sj-form-group">
+                <label class="sj-label"><i class="fa-solid fa-hashtag"></i> Session Number (auto)</label>
+                <input type="number" class="sj-input" id="sessionNumber" name="session_number" value="{{ new_session }}" readonly style="background:#eef0f8;">
             </div>
         </div>
     </div>
@@ -167,8 +194,8 @@
     </div> {% endcomment %}
 
     <!-- Modalities Grid -->
-    <div class="selection-card">
-        <h3>⚡ Select Modalities Performed</h3>
+    <div class="sj-card sj-card-pad rx-section">
+        <h3 class="sj-card-title"><i class="fa-solid fa-bolt"></i> Select Modalities Performed</h3>
         <div class="stats" id="stats">
             <span class="modality-count" id="modalityCount">0</span>
             <span>modalities selected</span>
@@ -178,11 +205,11 @@
     </div>
 
     <!-- Post-session -->
-    <div class="selection-card">
+    <div class="sj-card sj-card-pad rx-section">
         {% comment %} <h3>📈 Post-Session Assessment</h3> {% endcomment %}
-        <div class="grid-2col">
-            <div class="form-group"><label>📊 Treatment Response</label>
-                <select id="response" name="treatment_response">
+        <div class="sj-grid sj-grid-auto">
+            <div class="sj-form-group"><label class="sj-label"><i class="fa-solid fa-chart-line"></i> Treatment Response</label>
+                <select class="sj-select" id="response" name="treatment_response">
                     <option value="excellent">Excellent</option>
                     <option value="good">Good</option>
                     <option value="moderate">Moderate</option>
@@ -194,13 +221,13 @@
     </div>
 
     <!-- Summary -->
-    <div class="session-summary" id="sessionSummary" style="display: none;">
-        <h3>📋 Selected Modalities</h3>
+    <div class="session-summary sj-card sj-card-pad rx-section" id="sessionSummary" style="display: none;">
+        <h3 class="sj-card-title"><i class="fa-solid fa-clipboard-list"></i> Selected Modalities</h3>
         <div class="selected-modalities-list" id="selectedModalitiesList"></div>
         <div class="action-buttons">
-            <button class="btn btn-secondary" onclick="clearAllSelections()">Clear All</button>
-            <button class="btn btn-success" onclick="saveTreatmentSession('exercise')">💾 Save + Exercise</button>
-            <button class="btn btn-success" onclick="saveTreatmentSession('return')">💾 Save and Return</button>
+            <button class="sj-btn sj-btn-ghost" onclick="clearAllSelections()">Clear All</button>
+            <button class="sj-btn sj-btn-accent" onclick="saveTreatmentSession('exercise')"><i class="fa-solid fa-floppy-disk"></i> Save + Exercise</button>
+            <button class="sj-btn sj-btn-primary" onclick="saveTreatmentSession('return')"><i class="fa-solid fa-floppy-disk"></i> Save and Return</button>
         </div>
     </div>
 </div>
@@ -211,8 +238,8 @@
         <h3 id="modalTitle">Set Parameters</h3>
         <div id="modalParamsContainer"></div>
         <div class="modal-buttons">
-            <button class="btn btn-secondary" onclick="closeParameterModal()">Cancel</button>
-            <button class="btn btn-primary" onclick="saveParameterModal()">Save</button>
+            <button class="sj-btn sj-btn-ghost" onclick="closeParameterModal()">Cancel</button>
+            <button class="sj-btn sj-btn-primary" onclick="saveParameterModal()">Save</button>
         </div>
     </div>
 </div>

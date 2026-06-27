@@ -1,96 +1,80 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}My Clinic{% endblock %}
+{% block title %}My Clinics · Sajhya{% endblock %}
 
 {% block content %}
-<div class="navbar">
-    <div class="logo">Sa:jhya</div>
-
-    <!-- Settings Dropdown -->
-    <div class="dropdown">
-        <button class="btn-gradient dropdown-toggle">⚙️ Function</button>
-        <div class="dropdown-menu">
-            <a href="#" class="dropdown-item">👤 Assigned Clinic</a>
+<nav class="sj-nav">
+    <a href="{% url 'personal-dashboard' %}" class="sj-logo">Sa<span>:</span>jhya</a>
+    <div class="sj-nav-actions">
+        <a href="{% url 'personal-dashboard' %}" class="sj-pilllink"><i class="fas fa-users"></i> My Patients</a>
+        <div class="sj-dropdown" id="sjDropdown">
+            <button class="sj-btn sj-btn-primary" id="sjGear"><i class="fas fa-table-cells-large"></i> Function <i class="fas fa-chevron-down" style="font-size:.7rem"></i></button>
+            <div class="sj-menu">
+                <a href="#"><i class="fas fa-hospital-user" style="color:var(--sj-primary)"></i> Assigned Clinic</a>
+            </div>
         </div>
     </div>
-</div>
+</nav>
 
-<div class="container">
-    <!-- Clinic Table -->
+<div class="sj-wrap">
+    <div class="sj-head">
+        <div>
+            <a href="{% url 'personal-dashboard' %}" class="sj-crumb"><i class="fas fa-arrow-left"></i> Dashboard</a>
+            <h1>My Clinics</h1>
+            <p>Clinics you're engaged with and can manage patients for.</p>
+        </div>
+    </div>
+
     {% if clinics %}
-    <div class="table-responsive">
-        <table class="patient-table">
-            <thead>
-                <tr>        
-                    <th>Clinic Code</th>
-                    <th>Name</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for clinic in clinics %}
-                <tr>
-                    <td>{{ clinic.clinic_code }}</td>
-                    <td><strong>{{ clinic.clinic_name }}</strong></td>
-                    <td>
-                        <a href="{% url 'assigned-clinic-dashboard' clinic_id=clinic.clinic_id %}" class="btn btn-info">View Details</a>
-                        {% comment %} <a href="#" class="btn btn-info">View Details</a> {% endcomment %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="sj-grid sj-grid-auto">
+        {% for clinic in clinics %}
+        <div class="sj-card sj-card-pad">
+            <div class="sj-person" style="margin-bottom:16px;">
+                <div class="sj-avatar sj-avatar-lg">
+                    <i class="fas fa-hospital"></i>
+                </div>
+                <div>
+                    <div class="sj-nm" style="font-size:1.08rem;">{{ clinic.clinic_name }}</div>
+                    <div class="sj-sub"><span class="sj-badge sj-badge-muted">{{ clinic.clinic_code }}</span></div>
+                </div>
+            </div>
+            <a href="{% url 'assigned-clinic-dashboard' clinic_id=clinic.clinic_id %}" class="sj-btn sj-btn-primary sj-btn-block">
+                View Details <i class="fas fa-arrow-right"></i>
+            </a>
+        </div>
+        {% endfor %}
     </div>
     {% else %}
-    <div class="empty-state">
-        <h3>No Clinics Found</h3>
-        <p>You haven't created any clinics yet.</p>
+    <div class="sj-card">
+        <div class="sj-empty">
+            <div class="sj-ic"><i class="fas fa-hospital"></i></div>
+            <h3>No Clinics Found</h3>
+            <p>You aren't engaged with any clinics yet.</p>
+        </div>
     </div>
     {% endif %}
 </div>
+
 <script>
     fetch('/personal-acc/my-clinics/')
         .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
+            if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
             return response.json();
         })
-        .then(data => {
-            console.log('My accessible clinics:', data.clinics);
-            // Optional: show success in console
-        })
-        .catch(error => {
-            console.error('Failed to load clinics:', error);
-            // You could show a small notice on the page, but not required
-        });
+        .then(data => { console.log('My accessible clinics:', data.clinics); })
+        .catch(error => { console.error('Failed to load clinics:', error); });
 
-    document.addEventListener('DOMContentLoaded', function() {
-        const dropdown = document.querySelector('.dropdown');
-        const dropdownToggle = document.querySelector('.dropdown-toggle');
-        
-        if (dropdown && dropdownToggle) {
-            // Toggle dropdown on button click
-            dropdownToggle.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
+    document.addEventListener('DOMContentLoaded', function () {
+        const dropdown = document.getElementById('sjDropdown');
+        const gear = document.getElementById('sjGear');
+        if (dropdown && gear) {
+            gear.addEventListener('click', function (e) {
+                e.preventDefault(); e.stopPropagation();
                 dropdown.classList.toggle('open');
             });
-            
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!dropdown.contains(e.target)) {
-                    dropdown.classList.remove('open');
-                }
-            });
-            
-            // Close dropdown when an item is clicked
-            const dropdownItems = document.querySelectorAll('.dropdown-item');
-            dropdownItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    dropdown.classList.remove('open');
-                });
+            document.addEventListener('click', function (e) {
+                if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
             });
         }
     });

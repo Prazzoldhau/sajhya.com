@@ -1,46 +1,72 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Add Patient{% endblock %}
+{% block title %}Add Patient · Sajhya{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <i class="fas fa-user-plus fa-2x mb-2"></i>
-                <h3>Add Your Patient</h3>
-            </div>
-            <div class="auth-body">
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    
-                    {% for field in patient_form %}
-                        <div class="form-group">
-                            <label for="{{ field.id_for_label }}" class="form-label">
-                                {{ field.label }}
-                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                            </label>
-                            
-                            {{ field }}  <!-- ✅ Renders the actual input widget -->
-                            
-                            {% if field.help_text %}
-                                <small class="form-text text-muted">{{ field.help_text }}</small>
-                            {% endif %}
-                            {% for error in field.errors %}
-                                <div class="invalid-feedback d-block">{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                    
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn-gradient">
-                            Add Patient <i class="fas fa-plus-circle"></i>  <!-- ✅ Changed from "Sign Up" -->
-                        </button>
-                    </div>
-                </form>
-            </div>
+<nav class="sj-nav">
+    <a href="{% url 'personal-dashboard' %}" class="sj-logo">Sa<span>:</span>jhya</a>
+    <div class="sj-nav-actions">
+        <a href="{% url 'personal-dashboard' %}" class="sj-pilllink"><i class="fas fa-arrow-left"></i> Back to Patients</a>
+    </div>
+</nav>
+
+<div class="sj-wrap-narrow">
+    <div class="sj-head">
+        <div>
+            <a href="{% url 'personal-dashboard' %}" class="sj-crumb"><i class="fas fa-arrow-left"></i> My Patients</a>
+            <h1>Add a Patient</h1>
+            <p>Create a new patient record under your personal care.</p>
         </div>
     </div>
+
+    <div class="sj-card sj-card-pad">
+        <div class="sj-person" style="margin-bottom: 22px;">
+            <div class="sj-avatar sj-avatar-lg"><i class="fas fa-user-plus"></i></div>
+            <div>
+                <div class="sj-nm" style="font-size:1.1rem;">New Patient</div>
+                <div class="sj-sub">A unique patient code &amp; QR will be generated automatically.</div>
+            </div>
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            {% for field in patient_form %}
+                <div class="sj-form-group">
+                    <label for="{{ field.id_for_label }}" class="sj-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span style="color:var(--sj-danger)">*</span>{% endif %}
+                    </label>
+
+                    {{ field }}
+
+                    {% if field.help_text %}
+                        <small class="sj-hint">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="sj-hint" style="color:var(--sj-danger)">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="sj-btn sj-btn-primary sj-btn-lg sj-btn-block" style="margin-top:8px;">
+                Add Patient <i class="fas fa-plus-circle"></i>
+            </button>
+        </form>
+    </div>
 </div>
+
+<style>
+    /* Style Django-rendered form widgets to match the design system */
+    form input[type="text"], form input[type="number"], form input[type="email"],
+    form input[type="tel"], form input[type="date"], form select, form textarea {
+        border: 1px solid var(--sj-line); background: #f8f9fe; border-radius: 11px;
+        padding: 11px 14px; font-size: .92rem; font-family: inherit; color: var(--sj-ink);
+        outline: none; transition: .15s; width: 100%;
+    }
+    form input:focus, form select:focus, form textarea:focus {
+        border-color: var(--sj-primary); box-shadow: 0 0 0 3px rgba(91, 95, 241, .15); background: #fff;
+    }
+</style>
 {% endblock %}
